@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/adsb/(.*)", "destination": "https://api.adsb.lol/$1" },
+    { "source": "/api/adsbfi/(.*)", "destination": "https://opendata.adsb.fi/api/$1" },
+    { "source": "/api/opensky/(.*)", "destination": "https://opensky-network.org/api/$1" },
+    { "source": "/api/airplaneslive/(.*)", "destination": "https://airplanes.live/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

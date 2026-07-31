@@ -1,0 +1,11 @@
+[auth]
+enabled = true
+
+[auth.settings]
+sessions = 30
+
+[auth.mfa]
+enabled = false
+
+[analytics]
+enabled = false

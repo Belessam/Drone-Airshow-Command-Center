@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <!-- Portrait silhouette in tactical style -->
+  <rect width="48" height="48" rx="6" fill="#1d2026"/>
+  <rect x="0.5" y="0.5" width="47" height="47" rx="5.5" stroke="#414753" stroke-opacity="0.5"/>
+  <!-- Head -->
+  <circle cx="24" cy="18" r="8" fill="#32353c"/>
+  <!-- Neck and shoulders -->
+  <path d="M16 32C16 27 32 27 32 32V40H16V32Z" fill="#32353c"/>
+  <!-- Tactical headset -->
+  <rect x="18" y="15" width="12" height="2" rx="1" fill="#448ffd" opacity="0.6"/>
+  <rect x="18" y="18" width="8" height="2" rx="1" fill="#448ffd" opacity="0.3"/>
+</svg>

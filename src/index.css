@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #0A0C10;
+    color: #E0E2EB;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    overflow: hidden;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT THEME — overrides Tailwind tokens via CSS custom props
+   ══════════════════════════════════════════════════════════════ */
+[data-theme='light'] {
+  /* Surface colors */
+  --color-surface: #f8f9fb;
+  --color-surface-dim: #e8eaee;
+  --color-surface-bright: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f1f4;
+  --color-surface-container: #e8eaee;
+  --color-surface-container-high: #e0e2e8;
+  --color-surface-container-highest: #d8dbe2;
+  --color-surface-variant: #e0e2e8;
+  /* On-surface */
+  --color-on-surface: #1a1d23;
+  --color-on-surface-variant: #3f4850;
+  /* Outline */
+  --color-outline: #7c828d;
+  --color-outline-variant: #c1c6d5;
+  /* Primary */
+  --color-primary: #005cba;
+  --color-primary-container: #d7e3ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #001b3f;
+  /* Error */
+  --color-error: #c0001d;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410006;
+  /* Background */
+  --color-background: #f8f9fb;
+  --color-on-background: #1a1d23;
+  /* Map background */
+  --map-bg: #e8eaee;
+}
+
+[data-theme='light'] body {
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+}
+
+[data-theme='light'] .maplibregl-ctrl-attrib {
+  --map-bg: #e8eaee !important;
+}
+
+[data-theme='light'] .maplibregl-ctrl-group button {
+  background-color: var(--color-surface-container-high) !important;
+}
+
+[data-theme='light'] .scanline {
+  opacity: 0.08;
+}
+
+/* 🌙 Force dark-only elements to stay dark even in light mode */
+[data-theme='light'] .keep-dark {
+  background-color: #0A0C10 !important;
+  color: #E0E2EB !important;
+}
+
+@layer utilities {
+  .grid-overlay {
+    background-image:
+      linear-gradient(to right, rgba(48, 54, 61, 0.2) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(48, 54, 61, 0.2) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .map-texture {
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+    opacity: 0.15;
+  }
+
+  .scanline {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #2F80ED, transparent);
+    position: absolute;
+    top: -2px;
+    animation: scan 8s linear infinite;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  @keyframes scan {
+    0% { top: -2%; }
+    100% { top: 100%; }
+  }
+
+  .drone-pulse {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .drone-pulse-marker {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    transform-origin: center;
+  }
+
+  .drone-map-marker {
+    transition: transform 0.3s ease;
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.2; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+  }
+
+  .stale-flash {
+    animation: border-flash 1.5s infinite;
+  }
+
+  @keyframes border-flash {
+    0%, 100% { border-color: rgba(255, 180, 171, 0.3); }
+    50% { border-color: rgba(255, 180, 171, 1); }
+  }
+
+  .dashed-path {
+    stroke-dasharray: 8;
+    animation: dash-offset 20s linear infinite;
+  }
+
+  @keyframes dash-offset {
+    to { stroke-dashoffset: -200; }
+  }
+
+  /* Mobile sidebar slide-in animation */
+  .animate-slide-in {
+    animation: slideIn 0.2s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  /* Responsive touch target sizes */
+  @media (max-width: 767px) {
+    input, button, select, textarea, a, [role="button"] {
+      min-height: 44px;
+    }
+    input, select, textarea {
+      font-size: 16px !important; /* Prevent iOS zoom on focus */
+    }
+    .maplibregl-ctrl-bottom-right {
+      bottom: 56px !important;
+    }
+    .maplibregl-ctrl-bottom-left {
+      bottom: 56px !important;
+    }
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #10131a;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 2px;
+  }
+
+  .data-row:hover {
+    background-color: rgba(171, 199, 255, 0.04);
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #2F80ED !important;
+    box-shadow: 0 0 0 1px #2F80ED;
+  }
+
+  /* Material Symbols icon helpers */
+  .icon-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .icon-sm {
+    font-size: 16px;
+  }
+  .icon-md {
+    font-size: 20px;
+  }
+  .icon-lg {
+    font-size: 24px;
+  }
+  .icon-xl {
+    font-size: 32px;
+  }
+}
