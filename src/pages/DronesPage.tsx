@@ -93,9 +93,9 @@ export function DronesPage() {
         </div>
       </section>
 
-      {/* Table View — contained horizontal scroll on mobile (page never scrolls sideways, nothing clipped) */}
-      <section className="flex-1 overflow-x-auto custom-scrollbar">
-        <table className="w-full text-left border-collapse min-w-[560px] md:min-w-0">
+      {/* Table View — fits mobile width without horizontal scrolling; compact cells */}
+      <section className="flex-1 overflow-x-hidden custom-scrollbar">
+        <table className="w-full text-left border-collapse min-w-0">
           <thead className="sticky top-0 bg-surface-container-highest z-20">
             <tr className="border-b border-outline-variant">
               <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Drone ID</th>
@@ -132,14 +132,14 @@ export function DronesPage() {
                     onClick={() => setSelectedDrone(drone)}
                   >
                     <td className="px-2 md:px-6 py-2 md:py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary text-[16px] md:text-[18px]">airplanemode_active</span>
+                      <div className="flex items-center gap-1.5 md:gap-2">
+                        <span className="material-symbols-outlined text-primary text-[16px] md:text-[18px] shrink-0">airplanemode_active</span>
                         <span className="text-data-mono text-on-surface">{drone.drone_id}</span>
                       </div>
                     </td>
                     <td className="px-2 md:px-6 py-2 md:py-4">
                       <span
-                        className="px-1.5 md:px-2 py-0.5 text-label-caps text-[10px] border"
+                        className="px-1 md:px-2 py-0.5 text-label-caps text-[9px] md:text-[10px] border"
                         style={{
                           backgroundColor: `${siteColor}18`,
                           color: siteColor,
@@ -151,16 +151,16 @@ export function DronesPage() {
                     </td>
                     <td className="px-2 md:px-6 py-2 md:py-4">
                       <div className="flex items-center gap-1.5 md:gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
-                        <span className="text-body-sm text-on-surface capitalize">{drone.simulation_status}</span>
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: statusColor }} />
+                        <span className="text-body-sm text-on-surface capitalize text-[10px] md:text-body-sm">{drone.simulation_status}</span>
                       </div>
                     </td>
                     <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant">{drone.heading}°</td>
-                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant whitespace-nowrap">{drone.speed_mps} <span className="text-[10px] opacity-50">m/s</span></td>
-                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant whitespace-nowrap">{drone.last_confirmed_altitude} <span className="text-[10px] opacity-50">m</span></td>
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant md:whitespace-nowrap">{drone.speed_mps}<span className="text-[9px] opacity-50">m/s</span></td>
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant md:whitespace-nowrap">{drone.last_confirmed_altitude}<span className="text-[9px] opacity-50">m</span></td>
                     <td className="px-2 md:px-6 py-2 md:py-4">
                       <span
-                        className="px-1.5 md:px-2 py-0.5 text-label-caps text-[10px] border"
+                        className="px-1.5 md:px-2 py-0.5 text-label-caps text-[9px] md:text-[10px] border"
                         style={{
                           backgroundColor: `${freshness.color}15`,
                           color: freshness.color,
@@ -170,9 +170,9 @@ export function DronesPage() {
                         {freshness.label}
                       </span>
                     </td>
-                    <td className="px-2 md:px-6 py-2 md:py-4 text-right whitespace-nowrap">
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-right md:whitespace-nowrap">
                       <button
-                        className="text-primary hover:underline text-label-caps text-[10px] md:text-[11px] mr-2 md:mr-4"
+                        className="text-primary hover:underline text-label-caps text-[9px] md:text-[11px] mr-1 md:mr-4"
                         onClick={(e) => { e.stopPropagation(); setSelectedDrone(drone) }}
                       >
                         View

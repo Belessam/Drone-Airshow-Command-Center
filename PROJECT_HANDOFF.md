@@ -1600,6 +1600,24 @@ Surgical mobile UI polish. Desktop, tablet, and all previously fixed mobile beha
 
 ---
 
+## 32. MOBILE UI TWEAKS (3 ITEMS) (2026-07-31)
+
+Surgical mobile-only adjustments. **Full change log + reasons + verification in `HANDOFF.md` → "MOBILE UI TWEAKS (3 ITEMS) — 2026-07-31".**
+
+### Changes (mobile-only; `md:`/`max-md:` guards keep desktop/tablet identical)
+1. **Drone Fleet page** (`DronesPage.tsx`) — eliminated remaining horizontal scrolling: table `min-w-[560px]→min-w-0`, section `overflow-x-auto→overflow-x-hidden`, removed `whitespace-nowrap` from Speed/Altitude (now `md:`-only), compacted mobile fonts/padding/gaps. Fits 360–430px.
+2. **Location info bar** (`MapView.tsx`) — smaller on mobile (8px font, tighter gaps/padding), **permanently left-aligned** (`left-1.5` vs desktop centered), **always visible** (mouseleave no longer clears below 768px; seeded with map center on load; no mobile fade-out). Desktop unchanged.
+3. **Site selection** (`DashboardPage.tsx`) — on mobile, tapping a site selects/highlights it (ring, focus, `selectedSiteId`) but does **NOT** open the site status panel, so the location bar stays visible. Desktop/tablet still open the panel.
+
+### Verification
+- ✅ `npx tsc --noEmit` — 0 errors
+- ✅ `npm run build` — succeeds (149 modules)
+- ✅ Engine (17/17) + archive (6/6) tests pass
+- ✅ Playwright **16/16 checks**: Drone Fleet no h-scroll at 360/390/412/430; location bar visible+left-aligned at all 4 widths; site tap on mobile → no popup but ring highlight; desktop 768/1440 → site popup STILL opens + sidebar intact
+- Git shows only the 3 intended source files modified
+
+---
+
 ## NEXT SESSION START HERE
 
 1. **Read this entire PROJECT_HANDOFF.md** — especially sections 26, 27, 28, 29, and 30

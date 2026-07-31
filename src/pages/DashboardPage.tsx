@@ -271,7 +271,12 @@ export function DashboardPage() {
     if (site && site.latitude && site.longitude) {
       setFocusSiteState({ site, key: Date.now() })
       setSelectedSiteId(siteId)
-      setShowSites(true)
+      // On mobile, tapping a site only selects/highlights it — do NOT open the
+      // site status panel so the location info bar stays visible. Desktop/tablet
+      // keeps the existing open-panel behavior.
+      if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+        setShowSites(true)
+      }
     }
   }, [])
 

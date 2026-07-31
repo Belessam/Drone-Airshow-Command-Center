@@ -19,7 +19,7 @@ export function BottomBar({ activeDrones = 0 }: { activeDrones?: number }) {
   }
 
   return (
-    <footer className="w-full z-50 flex justify-between items-center px-2 sm:px-5 py-1.5 sm:py-2 bg-surface-dim border-t border-outline-variant h-11 sm:h-12 shrink-0 gap-2 sm:gap-8 overflow-x-hidden">
+    <footer className="w-full z-50 flex flex-col sm:flex-row justify-between items-center sm:items-center px-2 sm:px-5 py-1 sm:py-2 bg-surface-dim border-t border-outline-variant h-auto sm:h-12 shrink-0 gap-0.5 sm:gap-8 overflow-x-hidden">
       {/* Left section */}
       <div className="flex gap-2 sm:gap-8 items-center min-w-0">
         <div className="text-on-surface-variant flex items-center gap-1.5 sm:gap-3 text-label-caps text-[10px] sm:text-[11px] shrink-0">
@@ -43,6 +43,13 @@ export function BottomBar({ activeDrones = 0 }: { activeDrones?: number }) {
             <span className="text-data-mono text-on-surface text-[10px] sm:text-xs tracking-wider whitespace-nowrap">{formatTime('Asia/Riyadh')}</span>
           </div>
         </div>
+      </div>
+
+      {/* Mobile-only copyright — very small, own row, never overflows */}
+      <div className="lg:hidden sm:hidden w-full text-right">
+        <span className="text-[9px] font-data-mono text-outline/60 tracking-wider select-none whitespace-nowrap">
+          © First Lieutenant / Belal Essam
+        </span>
       </div>
 
       {/* Right section — secondary info hidden on small screens to prevent overflow */}

@@ -765,3 +765,51 @@ Surgical mobile UI polish pass on the Drone Airshow Command Center. Desktop layo
 1. Verify on a real mobile device (physical iPhone/Android) to confirm the icon-font rendering and browser chrome behavior.
 2. Continue with any remaining Priority 2/3 items from PROJECT_HANDOFF.md (production Supabase auth flow, dead-code cleanup of `MapFallback.tsx`/`useSites.ts`).
 3. Re-run `npm run build` before any deploy.
+
+---
+
+# MOBILE UI TWEAKS (3 ITEMS) — 2026-07-31
+
+## Task Performed
+Three surgical mobile-only UI adjustments on the stable project. No redesign, no refactoring, no business logic / auth / Supabase / drone / aircraft / fullscreen changes. Desktop and tablet layouts untouched.
+
+## Files Modified (3)
+| File | Change |
+|------|--------|
+| `src/pages/DronesPage.tsx` | Drone Fleet page: eliminated all horizontal scrolling — table `min-w-[560px] md:min-w-0` → `min-w-0`; section `overflow-x-auto` → `overflow-x-hidden`; removed `whitespace-nowrap` from Speed/Altitude (now `md:whitespace-nowrap`) so cells compress; smaller mobile fonts (status 10px, badges 9px, actions 9px, unit labels 9px), tighter gaps (`gap-1.5`), compact Drone ID icon gap + Source Site badge padding. Desktop values unchanged (`md:` guards). |
+| `src/features/map/MapView.tsx` | Location info bar (LAT/LNG/MGRS/FROM/HDG/DIST): mobile-only smaller — font 9px→8px, gap-x 2→1.5, padding px-2.5→px-1.5 py-1→py-0.5, `justify-center`→`justify-start`; **permanently left-aligned on mobile** (`left-1.5 max-md:left-1.5 md:left-1/2 md:-translate-x-1/2 max-md:translate-x-0`); **always visible on mobile** — `mouseleave` no longer clears position below 768px, and the bar is seeded with the map center on load; bar no longer fades out on mobile (`max-md:opacity-100`). Desktop unchanged (hover-driven, centered). |
+| `src/pages/DashboardPage.tsx` | Site selection (mobile only): `handleSiteClick` now skips `setShowSites(true)` when `window.innerWidth < 768` — tapping a site only selects/highlights it (sets `selectedSiteId`, shows tactical ring, focuses map) WITHOUT opening the site status panel, so the location bar stays visible. Desktop/tablet (`>= 768`) keeps the existing open-panel behavior. |
+
+## Reason for Each Change
+1. **Drone Fleet** — was still "too large" with residual horizontal scrolling on 360–430px phones; removed the table min-width and nowrap forcing width so every column compresses and fits naturally.
+2. **Location bar** — needed to be smaller, permanently left-aligned, and always visible; changed mobile positioning/hiding behavior while keeping the desktop's centered hover behavior byte-identical.
+3. **Site selection** — tapping a site on mobile opened the site status panel, which covered the location bar; gated only the panel-open on mobile (selection state unchanged), per requirement.
+
+## Build Status
+`npm run build` → ✅ succeeds (149 modules, ~1,589 kB JS).
+
+## TypeScript Status
+`npx tsc --noEmit` → ✅ 0 errors.
+
+## Tests Executed
+- Engine tests → ✅ 17/17 PASS
+- Archive tests → ✅ 6/6 PASS
+
+## Mobile Verification Completed (Playwright, 16/16 checks PASS)
+Viewports: **360×800, 390×844, 412×915, 430×932, 768×1024, 1440×900**
+- **Drone Fleet**: NO horizontal scrolling at 360/390/412/430 (main scrollWidth == clientWidth everywhere); page fits
+- **Location bar**: visible + left-aligned (left=6px) + within viewport at all 4 mobile widths; still visible after site interaction
+- **Site selection (mobile)**: tapping a site opens NO popup (`popupVisible=false`) but the site IS still selected/highlighted (tactical 200px ring renders — `ringVisible=true`)
+- **Desktop (768/1440)**: site popup STILL opens (md:absolute overlay visible), sidebar intact — no regression
+- Screenshots captured for visual confirmation (Drone Fleet fits, bar left-aligned)
+
+## Remaining Known Issues
+- None introduced. Pre-existing: username→email resolution RLS concern in production; AlertsPage/HistoryPage mock-only.
+
+## Risks
+- Low. All changes are mobile-only (`md:`/`max-md:` guards). Desktop and tablet are byte-identical. Site-selection logic still runs identically — only the panel-open call is gated on mobile.
+
+## Recommended Next Steps
+1. Verify on a physical device (touch behavior for the always-visible location bar + no-popup site tap).
+2. Continue any remaining Priority items from PROJECT_HANDOFF.md.
+3. Re-run `npm run build` before any deploy.

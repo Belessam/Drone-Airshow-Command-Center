@@ -289,6 +289,7 @@ If deployment fails:
 
 | Date | Change | Files |
 |------|--------|-------|
+| 2026-07-31 | **Mobile UI tweaks (3 items)** — Drone Fleet no h-scroll, location bar smaller/left-aligned/always-visible, site tap no popup on mobile (selection still highlights). Playwright 16/16 | `DronesPage.tsx`, `MapView.tsx`, `DashboardPage.tsx` |
 | 2026-07-31 | **Mobile polish pass** — login mobile scale + copyright slash, footer no-h-scroll, map legend/info-bar overlap fix, Drone Fleet responsive, mobile menu logo overlap, full Playwright regression (34/34) | `LoginPage.tsx`, `BottomBar.tsx`, `DashboardPage.tsx`, `MapView.tsx`, `Sidebar.tsx`, `DronesPage.tsx` |
 | 2026-07-31 | Fixed Admin 5 (smartguard) site_id resolution | `auth.ts`, `demoMode.ts`, `AuthContext.tsx` |
 | 2026-07-31 | Rolled back Aircraft registration feature | 13 files cleaned |
@@ -309,6 +310,7 @@ If deployment fails:
 | Engine tests (17/17) | ✅ PASS |
 | Archive tests (6/6) | ✅ PASS |
 | Mobile polish Playwright regression (34/34) | ✅ PASS (360/390/412/768/1440 + 360×500) |
+| Mobile UI tweaks Playwright (16/16) | ✅ PASS (360/390/412/430/768/1440): Drone Fleet no h-scroll, location bar visible+left-aligned, mobile site tap no popup, desktop popup intact |
 | No localhost references in src/ | ✅ |
 | No hardcoded secrets in frontend | ✅ |
 | VITE_DEMO_MODE=false for production | ✅ |

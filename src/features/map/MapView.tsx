@@ -258,10 +258,18 @@ export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneC
     m.on('load', () => {
       m.getCanvas().style.cursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpolygon points='10,2 6,18 10,14 14,18' fill='%23EF4444' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E") 10 4, default`
       setLd(true)
+      // On mobile the location bar is always visible — seed it with the map
+      // center so it has content immediately. Desktop keeps hover-driven behavior.
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        const c = m.getCenter()
+        setMousePos({ lat: c.lat, lng: c.lng })
+      }
     })
     m.on('rotate', () => setMapBearing(m.getBearing()))
     m.on('mousemove', (e) => { setMousePos({ lat: e.lngLat.lat, lng: e.lngLat.lng }) })
-    m.getCanvas().addEventListener('mouseleave', () => setMousePos(null))
+    // On mobile the info bar stays visible at all times (holds the last position);
+    // on desktop it hides when the cursor leaves the map canvas.
+    m.getCanvas().addEventListener('mouseleave', () => { if (typeof window !== 'undefined' && window.innerWidth >= 768) setMousePos(null) })
     map.current = m
     const moveHandler = () => {
       if (!refSiteRef.current || !map.current) return
@@ -585,26 +593,26 @@ export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneC
         )}
       </div>
 
-      {/* Mouse coords bar — SITE-REFERENCED bearing and distance
-          Mobile: wraps onto multiple lines so nothing is clipped; raised
-          above the layer legend. Desktop: single line, unchanged. */}
-      <div className={`absolute bottom-2 max-md:bottom-[64px] left-1/2 -translate-x-1/2 z-30 transition-opacity duration-200 ${mousePos ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      {/* Location info bar — LAT / LNG / MGRS / FROM / HDG / DIST
+          Mobile: smaller, always visible, permanently left-aligned, wraps so
+          nothing clips. Desktop: unchanged (centered, hover-driven). */}
+      <div className={`absolute bottom-2 max-md:bottom-[60px] z-30 transition-opacity duration-200 left-1.5 max-md:left-1.5 md:left-1/2 md:-translate-x-1/2 max-md:translate-x-0 ${mousePos ? 'opacity-100' : 'max-md:opacity-100 md:opacity-0 md:pointer-events-none'}`}>
         {mousePos && (
-        <div className="bg-surface-container/95 border border-outline-variant px-2.5 md:px-3 py-1 md:py-1.5 shadow-lg flex flex-wrap items-center justify-center gap-x-2 md:gap-x-3 gap-y-1 w-max max-w-[calc(100vw-16px)]">
-          <span className="text-data-mono text-[9px] md:text-[10px] text-on-surface font-medium whitespace-nowrap">LAT <span className="text-primary">{mousePos.lat.toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lat >= 0 ? 'N' : 'S'}</span></span>
+        <div className="bg-surface-container/95 border border-outline-variant px-1.5 md:px-3 py-0.5 md:py-1.5 shadow-lg flex flex-wrap items-center justify-start gap-x-1.5 md:gap-x-3 gap-y-0.5 w-max max-w-[calc(100vw-16px)]">
+          <span className="text-data-mono text-[8px] md:text-[10px] text-on-surface font-medium whitespace-nowrap">LAT <span className="text-primary">{mousePos.lat.toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lat >= 0 ? 'N' : 'S'}</span></span>
           <span className="text-outline/30">|</span>
-          <span className="text-data-mono text-[9px] md:text-[10px] text-on-surface font-medium whitespace-nowrap">LNG <span className="text-primary">{Math.abs(mousePos.lng).toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lng >= 0 ? 'E' : 'W'}</span></span>
+          <span className="text-data-mono text-[8px] md:text-[10px] text-on-surface font-medium whitespace-nowrap">LNG <span className="text-primary">{Math.abs(mousePos.lng).toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lng >= 0 ? 'E' : 'W'}</span></span>
           <span className="text-outline/30">|</span>
-          <span className="text-data-mono text-[9px] md:text-[10px] text-[#F2994A] font-medium whitespace-nowrap">MGRS <span className="text-[#F2994A]">{mgrsStr}</span></span>
+          <span className="text-data-mono text-[8px] md:text-[10px] text-[#F2994A] font-medium whitespace-nowrap">MGRS <span className="text-[#F2994A]">{mgrsStr}</span></span>
           {refSite && mouseInfo ? (
             <>
               <span className="text-outline/30">|</span>
-              <span className="text-data-mono text-[9px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">FROM <span className="text-[#56CCF2]">{refSite.code}</span></span>
-              <span className="text-data-mono text-[9px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">HDG <span className="text-[#56CCF2]">{mouseInfo.bearing.toFixed(0)}° {mouseInfo.label}</span></span>
-              <span className="text-data-mono text-[9px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">DIST <span className="text-[#56CCF2]">{mouseInfo.distKm.toFixed(1)} km</span></span>
+              <span className="text-data-mono text-[8px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">FROM <span className="text-[#56CCF2]">{refSite.code}</span></span>
+              <span className="text-data-mono text-[8px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">HDG <span className="text-[#56CCF2]">{mouseInfo.bearing.toFixed(0)}° {mouseInfo.label}</span></span>
+              <span className="text-data-mono text-[8px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">DIST <span className="text-[#56CCF2]">{mouseInfo.distKm.toFixed(1)} km</span></span>
             </>
           ) : (
-            <><span className="text-outline/30">|</span><span className="text-data-mono text-[9px] md:text-[10px] text-outline whitespace-nowrap">SELECT A SITE FOR REFERENCE</span></>
+            <><span className="text-outline/30">|</span><span className="text-data-mono text-[8px] md:text-[10px] text-outline whitespace-nowrap">SELECT A SITE FOR REFERENCE</span></>
           )}
         </div>
         )}
