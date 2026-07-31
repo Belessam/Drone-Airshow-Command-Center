@@ -67,9 +67,9 @@ export function LoginPage() {
   return (
     <>
       {/* Tactical Header */}
-      <div className="flex flex-col items-center mb-6 sm:mb-10">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 border border-outline-variant flex items-center justify-center mb-4 sm:mb-6 bg-surface-container-low">
-          <span className="material-symbols-outlined text-primary text-[28px] sm:text-[32px]">precision_manufacturing</span>
+      <div className="flex flex-col items-center mb-4 sm:mb-10">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 border border-outline-variant flex items-center justify-center mb-3 sm:mb-6 bg-surface-container-low">
+          <span className="material-symbols-outlined text-primary text-[24px] sm:text-[32px]">precision_manufacturing</span>
         </div>
         <div className="text-center space-y-1">
           <h1 className="font-headline-md text-headline-md text-on-surface tracking-tight">
@@ -82,8 +82,8 @@ export function LoginPage() {
       </div>
 
       {/* Login Form Card */}
-      <div className="bg-surface-container border border-outline-variant p-6 sm:p-8 shadow-2xl">
-        <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
+      <div className="bg-surface-container border border-outline-variant p-5 sm:p-8 shadow-2xl">
+        <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
           {/* Demo Mode Notice */}
           {isDemo && (
             <div className="bg-[#2F80ED]/10 border border-[#2F80ED]/30 p-3">
@@ -198,7 +198,7 @@ export function LoginPage() {
               Designed &amp; Engineered by
             </p>
             <p className="font-data-mono text-[11px] font-bold text-primary/70 tracking-wide">
-              First Lieutenant Belal Essam
+              First Lieutenant / Belal Essam
             </p>
             <p className="font-data-mono text-[9px] text-outline/30">
               Electronic Warfare &amp; Communications Engineer

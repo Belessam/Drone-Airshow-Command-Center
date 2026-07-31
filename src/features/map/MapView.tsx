@@ -588,23 +588,23 @@ export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneC
       {/* Mouse coords bar — SITE-REFERENCED bearing and distance
           Mobile: wraps onto multiple lines so nothing is clipped; raised
           above the layer legend. Desktop: single line, unchanged. */}
-      <div className={`absolute bottom-2 max-md:bottom-[80px] left-1/2 -translate-x-1/2 z-30 transition-opacity duration-200 ${mousePos ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute bottom-2 max-md:bottom-[64px] left-1/2 -translate-x-1/2 z-30 transition-opacity duration-200 ${mousePos ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {mousePos && (
-        <div className="bg-surface-container/95 border border-outline-variant px-3 py-1.5 shadow-lg flex flex-wrap items-center justify-center gap-x-3 gap-y-1 w-max max-w-[calc(100vw-16px)]">
-          <span className="text-data-mono text-[10px] text-on-surface font-medium whitespace-nowrap">LAT <span className="text-primary">{mousePos.lat.toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lat >= 0 ? 'N' : 'S'}</span></span>
+        <div className="bg-surface-container/95 border border-outline-variant px-2.5 md:px-3 py-1 md:py-1.5 shadow-lg flex flex-wrap items-center justify-center gap-x-2 md:gap-x-3 gap-y-1 w-max max-w-[calc(100vw-16px)]">
+          <span className="text-data-mono text-[9px] md:text-[10px] text-on-surface font-medium whitespace-nowrap">LAT <span className="text-primary">{mousePos.lat.toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lat >= 0 ? 'N' : 'S'}</span></span>
           <span className="text-outline/30">|</span>
-          <span className="text-data-mono text-[10px] text-on-surface font-medium whitespace-nowrap">LNG <span className="text-primary">{Math.abs(mousePos.lng).toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lng >= 0 ? 'E' : 'W'}</span></span>
+          <span className="text-data-mono text-[9px] md:text-[10px] text-on-surface font-medium whitespace-nowrap">LNG <span className="text-primary">{Math.abs(mousePos.lng).toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lng >= 0 ? 'E' : 'W'}</span></span>
           <span className="text-outline/30">|</span>
-          <span className="text-data-mono text-[10px] text-[#F2994A] font-medium whitespace-nowrap">MGRS <span className="text-[#F2994A]">{mgrsStr}</span></span>
+          <span className="text-data-mono text-[9px] md:text-[10px] text-[#F2994A] font-medium whitespace-nowrap">MGRS <span className="text-[#F2994A]">{mgrsStr}</span></span>
           {refSite && mouseInfo ? (
             <>
               <span className="text-outline/30">|</span>
-              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">FROM <span className="text-[#56CCF2]">{refSite.code}</span></span>
-              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">HDG <span className="text-[#56CCF2]">{mouseInfo.bearing.toFixed(0)}° {mouseInfo.label}</span></span>
-              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">DIST <span className="text-[#56CCF2]">{mouseInfo.distKm.toFixed(1)} km</span></span>
+              <span className="text-data-mono text-[9px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">FROM <span className="text-[#56CCF2]">{refSite.code}</span></span>
+              <span className="text-data-mono text-[9px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">HDG <span className="text-[#56CCF2]">{mouseInfo.bearing.toFixed(0)}° {mouseInfo.label}</span></span>
+              <span className="text-data-mono text-[9px] md:text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">DIST <span className="text-[#56CCF2]">{mouseInfo.distKm.toFixed(1)} km</span></span>
             </>
           ) : (
-            <><span className="text-outline/30">|</span><span className="text-data-mono text-[10px] text-outline whitespace-nowrap">SELECT A SITE FOR REFERENCE</span></>
+            <><span className="text-outline/30">|</span><span className="text-data-mono text-[9px] md:text-[10px] text-outline whitespace-nowrap">SELECT A SITE FOR REFERENCE</span></>
           )}
         </div>
         )}

@@ -39,16 +39,16 @@ export function DronesPage() {
   return (
     <PageLayout title="Drone Airshow Command Center">
       {/* Tool Bar */}
-      <section className="p-grid-gutter bg-surface-container-low flex flex-col gap-4 border-b border-outline-variant">
-        <div className="flex flex-wrap justify-between items-end gap-4">
-          <div className="flex flex-col gap-2">
+      <section className="p-3 md:p-grid-gutter bg-surface-container-low flex flex-col gap-3 md:gap-4 border-b border-outline-variant">
+        <div className="flex flex-wrap justify-between items-end gap-3 md:gap-4">
+          <div className="flex flex-col gap-1 md:gap-2">
             <h2 className="text-headline-md text-on-surface">Drone Fleet</h2>
             <p className="text-body-sm text-on-surface-variant">
               Manage telemetry and synchronization for {liveDrones.filter((d) => d.is_active).length} active units.
             </p>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <div className="relative">
+          <div className="flex gap-2 flex-wrap w-full md:w-auto">
+            <div className="relative flex-1 md:flex-none">
               <input
                 className="bg-surface-container text-on-surface border border-outline-variant pl-10 pr-4 py-2 text-body-sm w-full sm:w-64 focus:border-primary focus:ring-0 outline-none transition-all"
                 placeholder="Search Drone ID..."
@@ -71,7 +71,7 @@ export function DronesPage() {
             )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 md:gap-4">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded border border-outline-variant">
             <span className="text-label-caps text-on-surface-variant">Filter by Status:</span>
             <select
@@ -93,25 +93,25 @@ export function DronesPage() {
         </div>
       </section>
 
-      {/* Table View */}
-      <section className="flex-1 overflow-auto custom-scrollbar">
-        <table className="w-full text-left border-collapse">
+      {/* Table View — contained horizontal scroll on mobile (page never scrolls sideways, nothing clipped) */}
+      <section className="flex-1 overflow-x-auto custom-scrollbar">
+        <table className="w-full text-left border-collapse min-w-[560px] md:min-w-0">
           <thead className="sticky top-0 bg-surface-container-highest z-20">
             <tr className="border-b border-outline-variant">
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Drone ID</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Source Site</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Heading</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Speed</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Altitude</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider">Freshness</th>
-              <th className="px-6 py-3 text-label-caps text-outline uppercase tracking-wider text-right">Actions</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Drone ID</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Source Site</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Status</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Heading</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Speed</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Altitude</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px]">Freshness</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-label-caps text-outline uppercase tracking-wider text-[10px] md:text-[11px] text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/30">
             {filteredDrones.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-12 text-center">
+                <td colSpan={8} className="px-2 md:px-6 py-8 md:py-12 text-center">
                   <span className="material-symbols-outlined text-outline text-3xl block mb-2">search_off</span>
                   <p className="text-body-sm text-on-surface-variant">No drones match your filters.</p>
                 </td>
@@ -131,15 +131,15 @@ export function DronesPage() {
                     className="data-row transition-colors cursor-pointer"
                     onClick={() => setSelectedDrone(drone)}
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-2 md:px-6 py-2 md:py-4">
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary text-[18px]">airplanemode_active</span>
+                        <span className="material-symbols-outlined text-primary text-[16px] md:text-[18px]">airplanemode_active</span>
                         <span className="text-data-mono text-on-surface">{drone.drone_id}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 md:px-6 py-2 md:py-4">
                       <span
-                        className="px-2 py-0.5 text-label-caps border"
+                        className="px-1.5 md:px-2 py-0.5 text-label-caps text-[10px] border"
                         style={{
                           backgroundColor: `${siteColor}18`,
                           color: siteColor,
@@ -149,18 +149,18 @@ export function DronesPage() {
                         {site?.code || 'Unknown'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-2 md:px-6 py-2 md:py-4">
+                      <div className="flex items-center gap-1.5 md:gap-2">
                         <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
                         <span className="text-body-sm text-on-surface capitalize">{drone.simulation_status}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-data-mono text-on-surface-variant">{drone.heading}°</td>
-                    <td className="px-6 py-4 text-data-mono text-on-surface-variant">{drone.speed_mps} <span className="text-[10px] opacity-50">m/s</span></td>
-                    <td className="px-6 py-4 text-data-mono text-on-surface-variant">{drone.last_confirmed_altitude} <span className="text-[10px] opacity-50">m</span></td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant">{drone.heading}°</td>
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant whitespace-nowrap">{drone.speed_mps} <span className="text-[10px] opacity-50">m/s</span></td>
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-data-mono text-on-surface-variant whitespace-nowrap">{drone.last_confirmed_altitude} <span className="text-[10px] opacity-50">m</span></td>
+                    <td className="px-2 md:px-6 py-2 md:py-4">
                       <span
-                        className="px-2 py-0.5 text-label-caps border"
+                        className="px-1.5 md:px-2 py-0.5 text-label-caps text-[10px] border"
                         style={{
                           backgroundColor: `${freshness.color}15`,
                           color: freshness.color,
@@ -170,14 +170,14 @@ export function DronesPage() {
                         {freshness.label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-2 md:px-6 py-2 md:py-4 text-right whitespace-nowrap">
                       <button
-                        className="text-primary hover:underline text-label-caps mr-4"
+                        className="text-primary hover:underline text-label-caps text-[10px] md:text-[11px] mr-2 md:mr-4"
                         onClick={(e) => { e.stopPropagation(); setSelectedDrone(drone) }}
                       >
                         View
                       </button>
-                      <button className="text-on-surface-variant hover:text-on-surface material-symbols-outlined text-[18px] align-middle">
+                      <button className="text-on-surface-variant hover:text-on-surface material-symbols-outlined text-[16px] md:text-[18px] align-middle">
                         more_vert
                       </button>
                     </td>

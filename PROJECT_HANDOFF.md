@@ -1579,6 +1579,27 @@ For future debugging, per-aircraft HAB/Site tracing was added at every pipeline 
 
 ---
 
+## 31. MOBILE POLISH PASS (2026-07-31)
+
+Surgical mobile UI polish. Desktop, tablet, and all previously fixed mobile behavior preserved exactly. **See `HANDOFF.md` → "MOBILE POLISH PASS — 2026-07-31" for the full change log, reasons, and verification details.**
+
+### Changes (mobile-only, `sm:`/`md:` guards preserve desktop/tablet)
+1. **Login screen** (`LoginPage.tsx`) — reduced mobile scale: logo `w-14→w-12`, icon `28px→24px`, header `mb-6→mb-4`, card `p-6→p-5`, form `space-y-5→space-y-4`. Copyright now `First Lieutenant / Belal Essam`.
+2. **Footer** (`BottomBar.tsx`) — `overflow-x-auto→overflow-x-hidden`; compact mobile sizes (padding/gaps/icons/text); labels hidden on smallest screens; right section stays desktop-only.
+3. **Map legend + info bar overlap** (`DashboardPage.tsx`, `MapView.tsx`) — legend compact on mobile; **`min-h-0` on legend buttons** fixes the real bug: the global 44px `min-height` rule was inflating legend chips → 105px legend overlapping the info bar. Now 57px; info bar at `bottom-[64px]` sits cleanly above. Verified: info bar bottom=736, legend top=737 @ 390px.
+4. **Drone Fleet** (`DronesPage.tsx`) — responsive toolbar (mobile padding, full-width search), contained table scroll (`min-w-[560px] md:min-w-0` + section `overflow-x-auto`) so page never scrolls sideways, compact mobile cell padding/fonts.
+5. **Mobile menu logo overlap** (`Sidebar.tsx`) — hamburger only renders when Sidebar owns its open state (`isMobileOpen === undefined`), removing the duplicate floating hamburger over the header logo in the TopBar drawer.
+6. **Copyright slash** (`LoginPage.tsx`) — exact text change.
+
+### Verification
+- ✅ `npx tsc --noEmit` — 0 errors
+- ✅ `npm run build` — succeeds (149 modules)
+- ✅ Engine (17/17) + archive (6/6) tests pass
+- ✅ Playwright **34/34 checks** across 360/390/412/768/1440 (+360×500): login no overflow + slash + scroll; legend/info no overlap; footer fits; Operating Sites sheet; Register modal; fullscreen; Drone Fleet fits; desktop/tablet footer + sidebar + overlay intact
+- **Test-env note:** Playwright aborts Google Fonts (sandbox), which inflates Material Symbols to full-text width and caused false footer-overflow readings. With realistic 18px icons the footer is 282px content in 360px — fits. Confirmed via screenshots.
+
+---
+
 ## NEXT SESSION START HERE
 
 1. **Read this entire PROJECT_HANDOFF.md** — especially sections 26, 27, 28, 29, and 30

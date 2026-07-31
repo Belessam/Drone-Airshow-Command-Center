@@ -451,45 +451,45 @@ export function DashboardPage() {
             </div>
           )}
 
-          {/* Layer Toggles + Aircraft Legend */}
-          <div className="absolute bottom-2 left-2 z-30 flex gap-2 max-w-[calc(100vw-16px)]">
-            <div className="bg-surface-container/90 border border-outline-variant px-3 py-1.5 shadow-lg max-w-full">
-              <div className="flex items-center gap-3 mb-1 flex-wrap">
+          {/* Layer Toggles + Aircraft Legend — compact on mobile */}
+          <div className="absolute bottom-1.5 md:bottom-2 left-1.5 md:left-2 z-30 flex gap-2 max-w-[calc(100vw-16px)]">
+            <div className="bg-surface-container/90 border border-outline-variant px-2.5 md:px-3 py-1 md:py-1.5 shadow-lg max-w-full">
+              <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
                 <button
-                  className={`flex items-center gap-1 text-label-caps transition-colors ${showSites ? 'text-[#2F80ED]' : 'text-outline'}`}
+                  className={`flex items-center gap-1 min-h-0 py-0 text-[10px] md:text-label-caps transition-colors ${showSites ? 'text-[#2F80ED]' : 'text-outline'}`}
                   onClick={() => setShowSites(!showSites)}
                 >
-                  <span className={`w-2 h-2 rounded-full ${showSites ? 'bg-[#2F80ED]' : 'bg-outline'}`} />
+                  <span className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${showSites ? 'bg-[#2F80ED]' : 'bg-outline'}`} />
                   Sites
                 </button>
                 <span className="text-outline/20">|</span>
-                <span className="flex items-center gap-1 text-label-caps text-[#F2994A]">
-                  <span className="w-2 h-2 rounded-full bg-[#F2994A]" />
+                <span className="flex items-center gap-1 min-h-0 text-[10px] md:text-label-caps text-[#F2994A]">
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#F2994A]" />
                   Drones
                 </span>
                 <span className="text-outline/20">|</span>
                 <button
-                  className={`flex items-center gap-1 text-label-caps transition-colors ${showAircraft ? 'text-[#56CCF2]' : 'text-outline'}`}
+                  className={`flex items-center gap-1 min-h-0 py-0 text-[10px] md:text-label-caps transition-colors ${showAircraft ? 'text-[#56CCF2]' : 'text-outline'}`}
                   onClick={toggleAircraft}
                 >
-                  <span className={`w-2 h-2 rounded-full ${showAircraft ? 'bg-[#56CCF2]' : 'bg-outline'}`} />
+                  <span className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${showAircraft ? 'bg-[#56CCF2]' : 'bg-outline'}`} />
                   Aircraft
                 </button>
               </div>
               {showAircraft && (
-                <div className="flex items-center gap-3 pt-1 border-t border-outline-variant/30 flex-wrap">
-                  <span className="flex items-center gap-1 text-label-caps text-[10px] text-[#56CCF2]">
+                <div className="flex items-center gap-2 md:gap-3 pt-1 border-t border-outline-variant/30 flex-wrap">
+                  <span className="flex items-center gap-1 min-h-0 text-[9px] md:text-label-caps text-[10px] text-[#56CCF2]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#56CCF2]" /> Civilian
                   </span>
-                  <span className="flex items-center gap-1 text-label-caps text-[10px] text-[#EF4444]">
+                  <span className="flex items-center gap-1 min-h-0 text-[9px] md:text-label-caps text-[10px] text-[#EF4444]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#EF4444]" /> Military
                   </span>
-                  <span className="flex items-center gap-1 text-label-caps text-[10px] text-[#F2994A]">
+                  <span className="flex items-center gap-1 min-h-0 text-[9px] md:text-label-caps text-[10px] text-[#F2994A]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#F2994A]" /> Unknown
                   </span>
                   <span className="text-outline/20">|</span>
                   <button
-                    className={`flex items-center gap-1 text-label-caps text-[10px] transition-colors ${showDiagnostics ? 'text-[#8B5CF6]' : 'text-outline'}`}
+                    className={`flex items-center gap-1 min-h-0 py-0 text-[9px] md:text-label-caps text-[10px] transition-colors ${showDiagnostics ? 'text-[#8B5CF6]' : 'text-outline'}`}
                     onClick={() => setShowDiagnostics(!showDiagnostics)}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${showDiagnostics ? 'bg-[#8B5CF6]' : 'bg-outline'}`} />

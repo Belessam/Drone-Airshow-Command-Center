@@ -708,3 +708,60 @@ The merge pipeline now has 5 sources with priority scoring:
 - ✅ Airplanes.live enabled (HAB cell only)
 - ✅ All providers configurable from config.ts
 - ✅ Instrumentation confirms: NO provider returns HAB-near aircraft
+
+---
+
+# MOBILE POLISH PASS — 2026-07-31
+
+## Task Performed
+Surgical mobile UI polish pass on the Drone Airshow Command Center. Desktop layout, business logic, auth, RBAC, Supabase, drone registration, map logic, fullscreen logic, and all previously fixed mobile behavior preserved exactly. No redesigns, no logic changes.
+
+## Files Modified (7)
+| File | Change |
+|------|--------|
+| `src/pages/LoginPage.tsx` | Reduced mobile visual scale (logo 14→12, icon 28→24, header mb, card padding p-6→p-5, form spacing space-y-5→space-y-4). **Mobile-only** (`sm:` values unchanged → desktop identical). Added "/" separator to copyright: `First Lieutenant / Belal Essam`. |
+| `src/layouts/BottomBar.tsx` | Footer now fits mobile width. `overflow-x-auto` → `overflow-x-hidden`; reduced padding/gaps/icons/text on mobile only (`sm:` unchanged); "System Health" / "Active Drones:" labels hidden on smallest screens (`hidden sm:inline`); height h-12→h-11 on mobile. Right section (Connectivity/Sync/Copyright) remains `hidden lg:flex` (desktop only). |
+| `src/pages/DashboardPage.tsx` | Map legend (Sites/Drones/Aircraft/Diag): compact on mobile (`px-2.5 py-1`, text 10px, dots 6px). **Critical:** added `min-h-0` to legend buttons/chips — the global `@media (max-width:767px) { button { min-height:44px } }` rule was inflating each legend button to 44px, making the legend 105px tall and overlapping the info bar. Now 57px. |
+| `src/features/map/MapView.tsx` | Info bar (LAT/LNG/MGRS/HDG/DIST): reduced mobile bottom offset to `bottom-[64px]`, smaller text (9px) + gaps on mobile. Desktop unchanged (`md:` values preserved). |
+| `src/layouts/Sidebar.tsx` | Mobile hamburger now only renders when the Sidebar manages its own open state (`isMobileOpen === undefined`). This removes the duplicate floating hamburger that appeared **overlapping the header logo** when the TopBar drawer rendered a Sidebar instance. |
+| `src/pages/DronesPage.tsx` | Drone Fleet page responsive: toolbar padding reduced on mobile (`p-3 md:p-grid-gutter`), search input full-width on mobile (`flex-1 md:flex-none`), table container uses **contained** horizontal scroll (`overflow-x-auto` + `min-w-[560px] md:min-w-0`) so the page never scrolls sideways and no column is clipped; table cell/header padding reduced on mobile (`px-2 md:px-6`, `py-2 md:py-4`), smaller fonts/badges on mobile. |
+| `src/index.css` | *(No change this pass — the `@media (max-width:767px)` block with 44px touch targets remains; the legend now overrides it with `min-h-0`.)* |
+
+## Reason for Each Change
+1. **Login** — mobile users reported the screen still "too zoomed-in"; reduced only mobile scale while keeping exact layout & scroll behavior.
+2. **Footer** — was wider than mobile viewport, requiring horizontal scrolling; made it fit with `overflow-x-hidden` + compact mobile sizes.
+3. **Bottom nav + info bar overlap** — the map legend was 105px tall on mobile because the global 44px `min-height` rule applied to every small legend button; `min-h-0` compacted it to 57px, and the info bar at `bottom-[64px]` now sits cleanly above it (verified: info bar bottom=736, legend top=737 at 390px).
+4. **Drone Fleet** — was visually zoomed-in with page-level horizontal scroll; contained table scroll + reduced mobile spacing/padding.
+5. **Mobile menu** — the TopBar drawer rendered a Sidebar that drew its own floating hamburger (z-70) over the header logo; guarded it out.
+6. **Copyright** — exact requested text change (slash separator).
+
+## Build Status
+`npm run build` → ✅ succeeds (149 modules, ~1,589 kB JS, ~105 kB CSS). Only the pre-existing chunk-size warning.
+
+## TypeScript Status
+`npx tsc --noEmit` → ✅ 0 errors.
+
+## Tests Executed
+- Engine tests (`src/lib/simulation/__tests__/engine.test.ts`) → ✅ 17/17 PASS
+- Archive tests (`src/lib/simulation/__tests__/archive.test.ts`) → ✅ 6/6 PASS
+
+## Verification Performed (Playwright, all 5 viewports + 360x500)
+**34/34 automated checks PASSED** across 360×800, 390×844, 412×915, 768×1024, 1440×900, plus 360×500:
+- Login: no horizontal overflow at all viewports; copyright slash verified; form + submit visible; short-viewport scroll still works
+- Dashboard (mobile): legend + info bar **no overlap** (info bar fully above legend), info bar within viewport, footer fits (no h-scroll) at 360/390/412
+- Regression: Operating Sites hidden by default → opens as bottom sheet (map visible behind) → close works; Register Drone modal fits + Cancel/Register visible + internal scroll; fullscreen enter/exit (chrome hidden, map fills, layout restored)
+- Drone Fleet: page fits mobile width (no page-level h-scroll) at 360/390
+- Desktop/tablet: sidebar + sites overlay + footer fit at 768 & 1440
+
+**Test-environment note:** Playwright aborts Google Fonts (sandbox blocks them), which inflates Material Symbols ligatures to full-text width and caused false "footer overflow" readings. With realistic 18px icons (what a real device renders), the footer measures 282px content in a 360px viewport — fits comfortably. Screenshots visually confirm.
+
+## Remaining Known Issues
+- None introduced. Pre-existing: username→email resolution RLS concern in production; AlertsPage/HistoryPage still mock-only.
+
+## Risks
+- Low. All changes are mobile-only (`sm:`/`md:` guards preserve tablet/desktop). The legend `min-h-0` touches only map-legend chips; the 44px touch-target rule still applies to real controls (inputs, nav buttons, drawer items).
+
+## Recommended Next Steps
+1. Verify on a real mobile device (physical iPhone/Android) to confirm the icon-font rendering and browser chrome behavior.
+2. Continue with any remaining Priority 2/3 items from PROJECT_HANDOFF.md (production Supabase auth flow, dead-code cleanup of `MapFallback.tsx`/`useSites.ts`).
+3. Re-run `npm run build` before any deploy.

@@ -282,13 +282,14 @@ If deployment fails:
 
 - **Date:** 2026-07-31
 - **Git:** Not tracked (no repository)
-- **Bundle:** 1,585 kB JS + 102 kB CSS
+- **Bundle:** 1,589 kB JS + 105 kB CSS
 - **Build modules:** 149
 
 ## 18. Recent Changes (Since Last Audit)
 
 | Date | Change | Files |
 |------|--------|-------|
+| 2026-07-31 | **Mobile polish pass** — login mobile scale + copyright slash, footer no-h-scroll, map legend/info-bar overlap fix, Drone Fleet responsive, mobile menu logo overlap, full Playwright regression (34/34) | `LoginPage.tsx`, `BottomBar.tsx`, `DashboardPage.tsx`, `MapView.tsx`, `Sidebar.tsx`, `DronesPage.tsx` |
 | 2026-07-31 | Fixed Admin 5 (smartguard) site_id resolution | `auth.ts`, `demoMode.ts`, `AuthContext.tsx` |
 | 2026-07-31 | Rolled back Aircraft registration feature | 13 files cleaned |
 | 2026-07-31 | Fixed site coordinate resolution priority | `AddDroneModal.tsx`, `DashboardPage.tsx` |
@@ -307,6 +308,7 @@ If deployment fails:
 | `npm run build` | ✅ 149 modules |
 | Engine tests (17/17) | ✅ PASS |
 | Archive tests (6/6) | ✅ PASS |
+| Mobile polish Playwright regression (34/34) | ✅ PASS (360/390/412/768/1440 + 360×500) |
 | No localhost references in src/ | ✅ |
 | No hardcoded secrets in frontend | ✅ |
 | VITE_DEMO_MODE=false for production | ✅ |
@@ -314,3 +316,5 @@ If deployment fails:
 | Vercel rewrites configured | ✅ |
 | DEMO_USERS fallback safe for production | ✅ |
 | ADS-B proxy works for all 5 providers | ✅ |
+
+> **Note (mobile polish pass, 2026-07-31):** All changes are mobile-only (guarded by `sm:`/`md:`). Desktop and tablet behavior are byte-identical. Deployment config (`vercel.json`, env vars, migrations) untouched. Before deploying, re-run `npm run build` and confirm `VITE_DEMO_MODE=false` is set in Vercel.

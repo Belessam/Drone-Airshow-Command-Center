@@ -121,14 +121,17 @@ export function Sidebar({ onAddDrone, isMobileOpen, onMobileClose }: SidebarProp
       {/* Desktop sidebar — always visible */}
       <div className="hidden md:flex">{sidebarContent}</div>
 
-      {/* Mobile hamburger button — visible below md */}
-      <button
-        className="md:hidden fixed top-3 left-3 z-[70] w-10 h-10 bg-surface-container border border-outline-variant rounded-lg flex items-center justify-center shadow-lg"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Open navigation menu"
-      >
-        <span className="material-symbols-outlined text-on-surface">menu</span>
-      </button>
+      {/* Mobile hamburger button — visible below md, only when this Sidebar
+          manages its own open state (not when rendered inside the TopBar drawer) */}
+      {isMobileOpen === undefined && (
+        <button
+          className="md:hidden fixed top-3 left-3 z-[70] w-10 h-10 bg-surface-container border border-outline-variant rounded-lg flex items-center justify-center shadow-lg"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <span className="material-symbols-outlined text-on-surface">menu</span>
+        </button>
+      )}
 
       {/* Mobile drawer overlay */}
       {isOpen && (
