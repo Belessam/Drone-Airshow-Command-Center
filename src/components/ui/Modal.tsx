@@ -28,10 +28,10 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] sm:items-center sm:pt-0 p-2 sm:p-4">
+    <div className="modal-scrim fixed inset-0 z-[100] flex items-start justify-center pt-4 sm:items-center sm:pt-0 p-2 sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className={cn(
-        'relative bg-surface-container border border-outline-variant w-full shadow-2xl max-h-[85vh] flex flex-col overflow-hidden',
+        'relative bg-surface-container border border-outline-variant w-full shadow-2xl max-h-[min(85vh,calc(100dvh-2rem))] flex flex-col overflow-hidden',
         'mx-0 sm:mx-4',
         sizeMap[size],
       )}>

@@ -5,7 +5,7 @@ import { BottomBar } from './BottomBar'
 
 export function MainLayout() {
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-dvh overflow-hidden">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop sidebar — hidden on mobile, drawer via Sidebar component */}

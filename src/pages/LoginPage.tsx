@@ -67,9 +67,9 @@ export function LoginPage() {
   return (
     <>
       {/* Tactical Header */}
-      <div className="flex flex-col items-center mb-10">
-        <div className="w-16 h-16 border border-outline-variant flex items-center justify-center mb-6 bg-surface-container-low">
-          <span className="material-symbols-outlined text-primary text-[32px]">precision_manufacturing</span>
+      <div className="flex flex-col items-center mb-6 sm:mb-10">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 border border-outline-variant flex items-center justify-center mb-4 sm:mb-6 bg-surface-container-low">
+          <span className="material-symbols-outlined text-primary text-[28px] sm:text-[32px]">precision_manufacturing</span>
         </div>
         <div className="text-center space-y-1">
           <h1 className="font-headline-md text-headline-md text-on-surface tracking-tight">
@@ -82,8 +82,8 @@ export function LoginPage() {
       </div>
 
       {/* Login Form Card */}
-      <div className="bg-surface-container border border-outline-variant p-8 shadow-2xl">
-        <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="bg-surface-container border border-outline-variant p-6 sm:p-8 shadow-2xl">
+        <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
           {/* Demo Mode Notice */}
           {isDemo && (
             <div className="bg-[#2F80ED]/10 border border-[#2F80ED]/30 p-3">
@@ -186,7 +186,7 @@ export function LoginPage() {
 
       {/* ── Premium Military Copyright Footer (fixed at bottom of page) ── */}
       <div className="fixed bottom-0 left-0 right-0 pointer-events-none select-none">
-        <div className="max-w-[400px] mx-auto px-container-padding pb-4">
+        <div className="max-w-[400px] mx-auto px-container-padding pb-[calc(env(safe-area-inset-bottom,0px)+16px)]">
           <div className="border-t border-outline-variant/20 pt-4 space-y-1.5">
             <p className="font-data-mono text-[10px] text-outline/35 tracking-[0.12em] uppercase">
               SKYGUARD TACTICAL AIRSPACE MANAGEMENT SYSTEM

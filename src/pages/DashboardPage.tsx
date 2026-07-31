@@ -39,7 +39,10 @@ export function DashboardPage() {
   const { user, userSite } = useAuth()
   const [selectedDrone, setSelectedDrone] = useState<Drone | null>(null)
   const [showAddDrone, setShowAddDrone] = useState(false)
-  const [showSites, setShowSites] = useState(true)
+  // Operating Sites panel: open by default on desktop/tablet (>=768px),
+  // closed by default on mobile so the map is the primary focus. The
+  // "Sites" legend control / site markers open it on mobile.
+  const [showSites, setShowSites] = useState<boolean>(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [focusSiteState, setFocusSiteState] = useState<{ site: Site; key: number } | null>(null)
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null)
 
@@ -175,6 +178,34 @@ export function DashboardPage() {
 
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
+  // ── Fullscreen map mode ──
+  // Uses the browser Fullscreen API where supported, and always applies an
+  // app-level fallback (hide surrounding chrome, map fills viewport).
+  const [mapFullscreen, setMapFullscreen] = useState(false)
+
+  const toggleFullscreen = useCallback(() => {
+    const next = !mapFullscreen
+    setMapFullscreen(next)
+    try {
+      if (next) {
+        const el = document.documentElement
+        const req = (el as HTMLElement & { requestFullscreen?: () => Promise<void> }).requestFullscreen
+        if (req) req.call(el).catch(() => { /* native fullscreen unsupported — app fallback still applies */ })
+      } else if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {})
+      }
+    } catch {
+      /* no-op: app-level fallback handles it */
+    }
+  }, [mapFullscreen])
+
+  useEffect(() => {
+    const onFsChange = () => {
+      if (!document.fullscreenElement) setMapFullscreen(false)
+    }
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [])
 
   const activeDrones = liveDrones.filter((d) => d.is_active).length
 
@@ -245,15 +276,17 @@ export function DashboardPage() {
   }, [])
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      <TopBar />
+    <div className="flex flex-col h-dvh overflow-hidden">
+      {!mapFullscreen && <TopBar onAddDrone={() => setShowAddDrone(true)} />}
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile: sidebar as drawer, Desktop: sidebar always visible */}
-        <div className="hidden md:flex shrink-0">
-          <Sidebar onAddDrone={() => setShowAddDrone(true)} />
-        </div>
+        {!mapFullscreen && (
+          <div className="hidden md:flex shrink-0">
+            <Sidebar onAddDrone={() => setShowAddDrone(true)} />
+          </div>
+        )}
 
-        <main className="relative flex-1 overflow-hidden" style={{ backgroundColor: '#0A0C10' }}>
+        <main className={`relative flex-1 overflow-hidden ${mapFullscreen ? 'fixed inset-0 z-40' : ''}`} style={{ backgroundColor: '#0A0C10' }}>
           <MapView
             drones={mapMarkers}
             sites={mapSites}
@@ -267,6 +300,8 @@ export function DashboardPage() {
             focusKey={focusSiteState?.key}
             onSiteClick={handleSiteClick}
             selectedSiteId={selectedSiteId}
+            isFullscreen={mapFullscreen}
+            onToggleFullscreen={toggleFullscreen}
           />
 
           {/* Coverage Diagnostics (dev mode or ?diagnostics) */}
@@ -285,9 +320,12 @@ export function DashboardPage() {
             </div>
           )}
 
-          {/* Operating Sites + Site Details Panel */}
+          {/* Operating Sites + Site Details Panel
+              Mobile: fixed bottom sheet that slides up, fits the viewport,
+              easy to close, never permanently covers the map.
+              Desktop/tablet: absolute overlay (unchanged). */}
           {showSites && (
-            <div className="absolute left-1 sm:left-4 top-14 sm:top-4 w-[calc(100%-8px)] sm:w-72 max-h-[60vh] sm:max-h-[70vh] bg-surface-container/95 sm:bg-surface-container/90 border border-outline-variant flex flex-col z-50 text-[11px] sm:text-[inherit]">
+            <div className="fixed inset-x-0 bottom-0 z-50 max-h-[62dvh] rounded-t-lg border border-b-0 border-outline-variant bg-surface-container/95 backdrop-blur-md animate-slide-up pb-[env(safe-area-inset-bottom,0px)] flex flex-col text-[11px] md:absolute md:inset-x-auto md:bottom-auto md:left-4 md:top-4 md:w-72 md:max-h-[70vh] md:rounded-none md:border-b md:bg-surface-container/90 md:backdrop-blur-none md:animate-none sm:text-[inherit]">
               {/* Site Details when a site is selected */}
               {selectedSite ? (
                 <>
@@ -372,9 +410,18 @@ export function DashboardPage() {
                 <>
                   <div className="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
                     <span className="text-label-caps font-label-caps">Operating Sites</span>
-                    <span className="text-data-mono text-[10px] text-on-surface-variant">
-                      {String(liveSites.length).padStart(2, '0')} ACTIVE
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-data-mono text-[10px] text-on-surface-variant">
+                        {String(liveSites.length).padStart(2, '0')} ACTIVE
+                      </span>
+                      <button
+                        onClick={() => setShowSites(false)}
+                        className="md:hidden text-outline hover:text-on-surface text-[11px] flex items-center justify-center w-8 h-8"
+                        aria-label="Close operating sites panel"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">close</span>
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-col max-h-[400px] overflow-y-auto custom-scrollbar">
                     {liveSites.map((site) => {
@@ -405,9 +452,9 @@ export function DashboardPage() {
           )}
 
           {/* Layer Toggles + Aircraft Legend */}
-          <div className="absolute bottom-2 left-2 z-30 flex gap-2">
-            <div className="bg-surface-container/90 border border-outline-variant px-3 py-1.5 shadow-lg">
-              <div className="flex items-center gap-3 mb-1">
+          <div className="absolute bottom-2 left-2 z-30 flex gap-2 max-w-[calc(100vw-16px)]">
+            <div className="bg-surface-container/90 border border-outline-variant px-3 py-1.5 shadow-lg max-w-full">
+              <div className="flex items-center gap-3 mb-1 flex-wrap">
                 <button
                   className={`flex items-center gap-1 text-label-caps transition-colors ${showSites ? 'text-[#2F80ED]' : 'text-outline'}`}
                   onClick={() => setShowSites(!showSites)}
@@ -430,7 +477,7 @@ export function DashboardPage() {
                 </button>
               </div>
               {showAircraft && (
-                <div className="flex items-center gap-3 pt-1 border-t border-outline-variant/30">
+                <div className="flex items-center gap-3 pt-1 border-t border-outline-variant/30 flex-wrap">
                   <span className="flex items-center gap-1 text-label-caps text-[10px] text-[#56CCF2]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#56CCF2]" /> Civilian
                   </span>
@@ -546,7 +593,7 @@ export function DashboardPage() {
           </div>
         )}
       </div>
-      <BottomBar activeDrones={activeDrones} />
+      {!mapFullscreen && <BottomBar activeDrones={activeDrones} />}
       <AddDroneModal
         isOpen={showAddDrone}
         onClose={() => setShowAddDrone(false)}

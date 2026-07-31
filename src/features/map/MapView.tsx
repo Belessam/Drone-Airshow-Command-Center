@@ -50,6 +50,8 @@ interface MapViewProps {
   focusLatitude?: number; focusLongitude?: number; focusKey?: number
   onSiteClick?: (siteId: string) => void
   selectedSiteId?: string | null
+  isFullscreen?: boolean
+  onToggleFullscreen?: () => void
 }
 
 const TILES = 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
@@ -201,7 +203,7 @@ function buildAircraftEl(ac: AircraftMarker): HTMLDivElement {
   return el
 }
 
-export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneClick, onAircraftClick, selectedDroneId, focusLatitude, focusLongitude, focusKey, onSiteClick, selectedSiteId }: MapViewProps) {
+export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneClick, onAircraftClick, selectedDroneId, focusLatitude, focusLongitude, focusKey, onSiteClick, selectedSiteId, isFullscreen, onToggleFullscreen }: MapViewProps) {
   const mcRef = useRef<HTMLDivElement>(null)
   const map = useRef<maplibregl.Map | null>(null)
   const dM = useRef<Map<string, maplibregl.Marker>>(new Map())
@@ -284,6 +286,14 @@ export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneC
 
   // ── FLY TO ──
   useEffect(() => { if (!map.current || !ld) return; if (focusLatitude !== undefined && focusLongitude !== undefined && focusKey) map.current.flyTo({ center: [focusLongitude, focusLatitude], zoom: 10, duration: 1200 }) }, [focusKey, focusLatitude, focusLongitude, ld])
+
+  // ── RESIZE on fullscreen toggle ──
+  // MapLibre must re-measure after the container reflows (chrome hidden or restored).
+  useEffect(() => {
+    if (!map.current || !ld) return
+    const raf = requestAnimationFrame(() => map.current?.resize())
+    return () => cancelAnimationFrame(raf)
+  }, [isFullscreen, ld])
 
   // ── FIT — initial view only, skip if bounds are degenerate ──
   const fitted = useRef(false)
@@ -548,37 +558,53 @@ export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneC
     <div className="absolute inset-0" style={{ backgroundColor: 'var(--map-bg, #0A0C10)' }}>
       <div ref={mcRef} className="absolute inset-0" style={{ cursor: 'default' }} />
 
-      {/* North Arrow — rotates with map bearing to always point to true north */}
-      <div className="absolute top-4 right-4 z-30 pointer-events-none flex items-center gap-2">
-        <div
-          className="w-8 h-8 rounded border border-outline-variant bg-surface-container/80 flex items-center justify-center transition-transform duration-150"
-          style={{ transform: `rotate(${-mapBearing}deg)` }}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="8,2 4,14 8,11 12,14" fill="#EF4444" stroke="#EF4444" strokeWidth="0.5"/>
-          </svg>
+      {/* Top-right cluster — north arrow (rotates with map bearing) + fullscreen toggle */}
+      <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <div
+            className="w-8 h-8 rounded border border-outline-variant bg-surface-container/80 flex items-center justify-center transition-transform duration-150"
+            style={{ transform: `rotate(${-mapBearing}deg)` }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="8,2 4,14 8,11 12,14" fill="#EF4444" stroke="#EF4444" strokeWidth="0.5"/>
+            </svg>
+          </div>
+          <span className="text-label-caps text-on-surface-variant text-[11px] font-bold">N</span>
         </div>
-        <span className="text-label-caps text-on-surface-variant text-[11px] font-bold">N</span>
+        {onToggleFullscreen && (
+          <button
+            onClick={onToggleFullscreen}
+            className="pointer-events-auto w-10 h-10 rounded border border-outline-variant bg-surface-container/90 hover:bg-surface-container-high flex items-center justify-center shadow-lg"
+            title={isFullscreen ? 'Exit fullscreen map' : 'Enter fullscreen map'}
+            aria-label={isFullscreen ? 'Exit fullscreen map' : 'Enter fullscreen map'}
+          >
+            <span className="material-symbols-outlined text-on-surface text-[20px]">
+              {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* Mouse coords bar — SITE-REFERENCED bearing and distance */}
-      <div className={`absolute bottom-2 left-1/2 -translate-x-1/2 z-30 transition-opacity duration-200 ${mousePos ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      {/* Mouse coords bar — SITE-REFERENCED bearing and distance
+          Mobile: wraps onto multiple lines so nothing is clipped; raised
+          above the layer legend. Desktop: single line, unchanged. */}
+      <div className={`absolute bottom-2 max-md:bottom-[80px] left-1/2 -translate-x-1/2 z-30 transition-opacity duration-200 ${mousePos ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {mousePos && (
-        <div className="bg-surface-container/95 border border-outline-variant px-3 py-1.5 shadow-lg flex items-center gap-3 whitespace-nowrap">
-          <span className="text-data-mono text-[10px] text-on-surface font-medium">LAT <span className="text-primary">{mousePos.lat.toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lat >= 0 ? 'N' : 'S'}</span></span>
+        <div className="bg-surface-container/95 border border-outline-variant px-3 py-1.5 shadow-lg flex flex-wrap items-center justify-center gap-x-3 gap-y-1 w-max max-w-[calc(100vw-16px)]">
+          <span className="text-data-mono text-[10px] text-on-surface font-medium whitespace-nowrap">LAT <span className="text-primary">{mousePos.lat.toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lat >= 0 ? 'N' : 'S'}</span></span>
           <span className="text-outline/30">|</span>
-          <span className="text-data-mono text-[10px] text-on-surface font-medium">LNG <span className="text-primary">{Math.abs(mousePos.lng).toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lng >= 0 ? 'E' : 'W'}</span></span>
+          <span className="text-data-mono text-[10px] text-on-surface font-medium whitespace-nowrap">LNG <span className="text-primary">{Math.abs(mousePos.lng).toFixed(6)}°</span><span className="text-outline ml-0.5">{mousePos.lng >= 0 ? 'E' : 'W'}</span></span>
           <span className="text-outline/30">|</span>
-          <span className="text-data-mono text-[10px] text-[#F2994A] font-medium">MGRS <span className="text-[#F2994A]">{mgrsStr}</span></span>
+          <span className="text-data-mono text-[10px] text-[#F2994A] font-medium whitespace-nowrap">MGRS <span className="text-[#F2994A]">{mgrsStr}</span></span>
           {refSite && mouseInfo ? (
             <>
               <span className="text-outline/30">|</span>
-              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium">FROM <span className="text-[#56CCF2]">{refSite.code}</span></span>
-              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium">HDG <span className="text-[#56CCF2]">{mouseInfo.bearing.toFixed(0)}° {mouseInfo.label}</span></span>
-              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium">DIST <span className="text-[#56CCF2]">{mouseInfo.distKm.toFixed(1)} km</span></span>
+              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">FROM <span className="text-[#56CCF2]">{refSite.code}</span></span>
+              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">HDG <span className="text-[#56CCF2]">{mouseInfo.bearing.toFixed(0)}° {mouseInfo.label}</span></span>
+              <span className="text-data-mono text-[10px] text-[#56CCF2] font-medium whitespace-nowrap">DIST <span className="text-[#56CCF2]">{mouseInfo.distKm.toFixed(1)} km</span></span>
             </>
           ) : (
-            <><span className="text-outline/30">|</span><span className="text-data-mono text-[10px] text-outline">SELECT A SITE FOR REFERENCE</span></>
+            <><span className="text-outline/30">|</span><span className="text-data-mono text-[10px] text-outline whitespace-nowrap">SELECT A SITE FOR REFERENCE</span></>
           )}
         </div>
         )}

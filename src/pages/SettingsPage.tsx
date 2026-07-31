@@ -26,7 +26,7 @@ export function SettingsPage() {
           <p className="text-body-sm text-on-surface-variant mb-4">
             Configure data freshness classification time windows.
           </p>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="text-label-caps text-on-surface-variant block mb-2">Fresh (seconds)</label>
               <input

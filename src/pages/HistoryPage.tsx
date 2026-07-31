@@ -40,7 +40,7 @@ export function HistoryPage() {
           <div className="p-4 border-b border-outline-variant flex gap-4 flex-wrap">
             <div className="relative">
               <input
-                className="bg-surface text-on-surface border border-outline-variant pl-10 pr-4 py-2 text-body-sm w-64 focus:border-primary outline-none"
+                className="bg-surface text-on-surface border border-outline-variant pl-10 pr-4 py-2 text-body-sm w-full sm:w-64 focus:border-primary outline-none"
                 placeholder="Search events..."
                 type="text"
                 value={search}

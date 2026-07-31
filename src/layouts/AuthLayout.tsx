@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom'
 
 export function AuthLayout() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div className="h-[100dvh] flex overflow-y-auto">
       {/* Grid overlay */}
       <div className="fixed inset-0 grid-overlay pointer-events-none" />
       {/* Map texture background */}
@@ -16,7 +16,9 @@ export function AuthLayout() {
       {/* Scanline */}
       <div className="scanline" />
 
-      <div className="relative z-10 w-full max-w-[400px] mx-container-padding pb-28">
+      {/* m-auto: centers the card when the viewport is tall, and lets the
+          container scroll when content exceeds the viewport (safe centering). */}
+      <div className="m-auto relative z-10 w-full max-w-[400px] px-container-padding pb-28">
         <Outlet />
       </div>
 

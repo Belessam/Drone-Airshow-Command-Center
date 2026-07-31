@@ -50,7 +50,7 @@ export function DronesPage() {
           <div className="flex gap-2 flex-wrap">
             <div className="relative">
               <input
-                className="bg-surface-container text-on-surface border border-outline-variant pl-10 pr-4 py-2 text-body-sm w-64 focus:border-primary focus:ring-0 outline-none transition-all"
+                className="bg-surface-container text-on-surface border border-outline-variant pl-10 pr-4 py-2 text-body-sm w-full sm:w-64 focus:border-primary focus:ring-0 outline-none transition-all"
                 placeholder="Search Drone ID..."
                 type="text"
                 value={search}

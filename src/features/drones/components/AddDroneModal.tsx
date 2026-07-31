@@ -262,7 +262,7 @@ export function AddDroneModal({ isOpen, onClose, onCreated, liveSites }: AddDron
         {/* Flight Direction relative to Site */}
         <div className="space-y-2">
           <label className="text-label-caps text-on-surface-variant">Flight Direction relative to Site</label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
               className={`p-3 border text-left transition-all ${flightRelation === 'away' ? 'border-primary bg-primary/10' : 'border-outline-variant bg-surface-container-low hover:bg-surface-container'}`}
@@ -292,7 +292,7 @@ export function AddDroneModal({ isOpen, onClose, onCreated, liveSites }: AddDron
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Input label="Distance from Site (km)" icon="straighten" type="number" min={0} step={0.1}
             placeholder="e.g. 6" value={distanceKm} onChange={(e) => setDistanceKm(e.target.value)} required
             disabled={submitting || success}
@@ -340,7 +340,7 @@ export function AddDroneModal({ isOpen, onClose, onCreated, liveSites }: AddDron
           </Card>
         )}
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex justify-end gap-3 pt-2 sticky bottom-0 bg-surface-container md:static md:bg-transparent">
           <Button variant="secondary" type="button" onClick={handleClose} disabled={submitting}>Cancel</Button>
           <Button variant="primary" type="submit" icon={success ? 'check' : 'add_circle'} disabled={submitting || success}>
             {submitting ? 'Registering...' : success ? 'Registered!' : 'Register Drone'}

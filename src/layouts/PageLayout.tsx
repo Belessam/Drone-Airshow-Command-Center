@@ -11,7 +11,7 @@ interface PageLayoutProps {
 
 export function PageLayout({ title, children, headerContent }: PageLayoutProps) {
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-dvh overflow-hidden">
       <TopBar title={title}>{headerContent}</TopBar>
       <div className="flex flex-1 overflow-hidden">
         <div className="hidden md:flex shrink-0">

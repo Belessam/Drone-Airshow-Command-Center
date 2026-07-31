@@ -6,9 +6,11 @@ import { Sidebar } from './Sidebar'
 interface TopBarProps {
   title?: string
   children?: React.ReactNode
+  /** Forwards "Register Drone" to the mobile sidebar drawer (same as desktop sidebar). */
+  onAddDrone?: () => void
 }
 
-export function TopBar({ title, children }: TopBarProps) {
+export function TopBar({ title, children, onAddDrone }: TopBarProps) {
   const { user, roleDisplay, userSite } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [time, setTime] = useState(new Date())
@@ -26,7 +28,7 @@ export function TopBar({ title, children }: TopBarProps) {
         <div className="md:hidden fixed inset-0 z-[70]">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileSidebarOpen(false)} />
           <div className="absolute left-0 top-0 h-full shadow-2xl">
-            <Sidebar isMobileOpen={true} onMobileClose={() => setMobileSidebarOpen(false)} />
+            <Sidebar isMobileOpen={true} onMobileClose={() => setMobileSidebarOpen(false)} onAddDrone={onAddDrone} />
           </div>
         </div>
       )}

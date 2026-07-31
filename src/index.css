@@ -149,6 +149,16 @@
     to { transform: translateX(0); }
   }
 
+  /* Mobile bottom-sheet slide-up animation (Operating Sites panel) */
+  .animate-slide-up {
+    animation: slideUp 0.24s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
   /* Responsive touch target sizes */
   @media (max-width: 767px) {
     input, button, select, textarea, a, [role="button"] {
@@ -162,6 +172,11 @@
     }
     .maplibregl-ctrl-bottom-left {
       bottom: 56px !important;
+    }
+    /* Modal scrim — safe-area bottom padding so the modal card clears the
+       iOS home indicator / browser navigation bar on small screens. */
+    .modal-scrim {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
     }
   }
 

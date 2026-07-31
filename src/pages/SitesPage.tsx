@@ -550,7 +550,7 @@ export function SitesPage() {
 
             {coordFormat === 'ddm' && (
               <div className="space-y-3">
-                <div className="grid grid-cols-3 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lat Degrees</label>
                     <input type="number" step="any" placeholder="28" value={formDdmLatDeg} onChange={(e) => setFormDdmLatDeg(e.target.value)}
@@ -570,7 +570,7 @@ export function SitesPage() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lng Degrees</label>
                     <input type="number" step="any" placeholder="45" value={formDdmLngDeg} onChange={(e) => setFormDdmLngDeg(e.target.value)}
@@ -595,7 +595,7 @@ export function SitesPage() {
 
             {coordFormat === 'dms' && (
               <div className="space-y-3">
-                <div className="grid grid-cols-4 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lat °</label>
                     <input type="number" step="any" placeholder="28" value={formDmsLatDeg} onChange={(e) => setFormDmsLatDeg(e.target.value)}
@@ -620,7 +620,7 @@ export function SitesPage() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lng °</label>
                     <input type="number" step="any" placeholder="45" value={formDmsLngDeg} onChange={(e) => setFormDmsLngDeg(e.target.value)}
@@ -789,7 +789,7 @@ export function SitesPage() {
 
             {coordFormat === 'ddm' && (
               <div className="space-y-3">
-                <div className="grid grid-cols-3 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lat Degrees</label>
                     <input type="number" step="any" placeholder="28" value={formDdmLatDeg} onChange={(e) => setFormDdmLatDeg(e.target.value)}
@@ -809,7 +809,7 @@ export function SitesPage() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lng Degrees</label>
                     <input type="number" step="any" placeholder="45" value={formDdmLngDeg} onChange={(e) => setFormDdmLngDeg(e.target.value)}
@@ -834,7 +834,7 @@ export function SitesPage() {
 
             {coordFormat === 'dms' && (
               <div className="space-y-3">
-                <div className="grid grid-cols-4 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lat °</label>
                     <input type="number" step="any" placeholder="28" value={formDmsLatDeg} onChange={(e) => setFormDmsLatDeg(e.target.value)}
@@ -859,7 +859,7 @@ export function SitesPage() {
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-3 items-end">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
                   <div>
                     <label className="text-label-caps text-on-surface-variant text-[10px] block mb-1">Lng °</label>
                     <input type="number" step="any" placeholder="45" value={formDmsLngDeg} onChange={(e) => setFormDmsLngDeg(e.target.value)}

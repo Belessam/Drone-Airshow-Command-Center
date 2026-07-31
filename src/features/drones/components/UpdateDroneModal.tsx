@@ -194,7 +194,7 @@ export function UpdateDroneModal({ isOpen, onClose, drone }: UpdateDroneModalPro
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Input
             label="Heading (°)"
             icon="navigation"
@@ -258,7 +258,7 @@ export function UpdateDroneModal({ isOpen, onClose, drone }: UpdateDroneModalPro
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex justify-end gap-3 pt-2 sticky bottom-0 bg-surface-container md:static md:bg-transparent">
           <Button variant="secondary" type="button" onClick={handleClose} disabled={submitting}>
             Cancel
           </Button>

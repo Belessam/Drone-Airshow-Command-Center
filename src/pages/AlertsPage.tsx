@@ -66,7 +66,7 @@ interface ButtonGroupProps {
 
 function ButtonGroup({ options, selected, onSelect }: ButtonGroupProps) {
   return (
-    <div className="flex bg-surface-container border border-outline-variant p-0.5">
+    <div className="flex flex-wrap bg-surface-container border border-outline-variant p-0.5 w-full sm:w-auto">
       {options.map((opt) => (
         <button
           key={opt.value}
