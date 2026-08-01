@@ -320,3 +320,52 @@ If deployment fails:
 | ADS-B proxy works for all 5 providers | ✅ |
 
 > **Note (mobile polish pass, 2026-07-31):** All changes are mobile-only (guarded by `sm:`/`md:`). Desktop and tablet behavior are byte-identical. Deployment config (`vercel.json`, env vars, migrations) untouched. Before deploying, re-run `npm run build` and confirm `VITE_DEMO_MODE=false` is set in Vercel.
+
+---
+
+## 20. 2026-08-01 — Four-Task Implementation (Deployment-Relevant Changes)
+
+### New serverless function
+| Route | File | Purpose |
+|-------|------|---------|
+| `GET /api/session/ip` | `api/session/ip.ts` | Returns the caller's public IP (`{ "ip": "…" }`). Used by `sessionService.fetchPublicIp()` to populate `active_sessions.ip_address`. Requires deployment — without it the field falls back to empty (no crash). |
+
+Vercel will auto-detect the `api/` directory as serverless functions. The existing SPA catch-all rewrite (`/(.*) → /index.html`) does NOT shadow `/api/*` functions. No `vercel.json` change required.
+
+### Session management now functional
+- The Active Sessions feature previously never created rows because the session hook was never mounted. Now `SessionLifecycle.tsx` (mounted in `App.tsx`) drives `initSession` on login in production mode (no-op in demo).
+- Session rows record: user, device, session_token, **ip_address** (via the new route), login_time, last_activity, current_page, status, is_revoked.
+- Revocation by Master Admin now triggers auto-logout via the corrected heartbeat (`.select()` detects 0-row updates).
+- Ghost "online" rows on page reload are marked offline on re-init.
+
+### Supabase requirement (unchanged, but now REQUIRED for the feature)
+- Migration `20260801000000_active_session_management.sql` **must be applied** to the production Supabase project. Without it, `active_sessions`/`session_devices`/`login_history`/`heartbeat_logs` don't exist and the Active Sessions page degrades gracefully (shows empty + console error) but cannot manage sessions.
+- RLS for session tables is already defined in that migration and correctly restricts management to `master_admin` at the DB level.
+
+### Updated known limitations
+- **IP/geo logging for sessions:** ✅ NOW RESOLVED via `api/session/ip.ts`. Country/city remain unpopulated (no geo-resolver) — IP only.
+- **Username→email resolution in production:** unchanged (pre-existing).
+- **Heartbeat log auto-purge:** unchanged (pre-existing, requires pg_cron).
+- **Demo mode:** `VITE_DEMO_MODE=true` uses a placeholder Supabase → session tables 404. Expected; production is unaffected.
+
+### Deployment checklist additions
+- [ ] Deploy `api/session/ip.ts` (included automatically with `vercel deploy`)
+- [ ] Apply migration `20260801000000_active_session_management.sql` to production Supabase (SQL Editor)
+- [ ] Post-deploy smoke: login as any user → verify a row appears in `active_sessions` (Supabase Table Editor or `/security/sessions` as master admin)
+- [ ] Post-deploy smoke: master admin views `/security/sessions`, sees IP addresses, can force-logout a session
+- [ ] Post-deploy smoke: non-admin visits `/security/sessions` → "Access Denied"
+
+### Audit verification (2026-08-01)
+| Check | Status |
+|-------|--------|
+| `npx tsc -b` | ✅ 0 errors |
+| `npm run build` | ✅ 153 modules |
+| Engine tests (17/17) | ✅ PASS |
+| Archive tests (6/6) | ✅ PASS |
+| Footer Playwright (29/29) | ✅ PASS |
+| Tasks 2/3/4 Playwright (10/10) | ✅ PASS |
+| North reset preserves center/zoom (markers dx=0/dy=0) | ✅ |
+| No horizontal scroll introduced (360–430px) | ✅ |
+| Desktop/tablet layouts unchanged | ✅ |
+| `VITE_DEMO_MODE=false` in `.env` | ✅ |
+| No new secrets in frontend | ✅ |

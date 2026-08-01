@@ -5,10 +5,10 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useDronesData } from '@/hooks/useDronesData'
 import { useAuth } from '@/hooks/useAuth'
+import { useAllSites } from '@/hooks/useAllSites'
 import { canManageDrone } from '@/lib/supabase/auth'
 import { calculateBearing, calculateDistance } from '@/lib/simulation/engine'
 import { simulationRunner } from '@/lib/simulation/runner'
-import { isDemoMode, DEMO_SITES } from '@/utils/demoMode'
 import type { Drone } from '@/types'
 import { UpdateDroneModal } from './UpdateDroneModal'
 import { DroneTimeline } from './DroneTimeline'
@@ -25,13 +25,16 @@ export function DroneDetailPanel({ isOpen, onClose, drone, onFocusMap, onViewHis
   const [showUpdate, setShowUpdate] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const { getDroneEvents, getDroneUpdates, deleteDrone } = useDronesData()
-  const { user, sites } = useAuth()
+  const { user } = useAuth()
+  // Site list resolved independently of the viewer's own site assignment.
+  // The drone's SITE RELATIONSHIPS are display data about the drone itself —
+  // they must render even when the viewer's assigned site differs.
+  const sites = useAllSites()
 
   if (!drone) return null
 
-  // Get site info — try auth sites first, then demo sites
+  // Get site info for the drone's real source site
   const site = sites.find((s) => s.id === drone.source_site_id)
-    || (isDemoMode() ? DEMO_SITES.find((s) => s.id === drone.source_site_id) : undefined)
   const siteColor = site?.color || '#abc7ff'
 
   // Calculate elapsed time since last confirmed
@@ -231,10 +234,11 @@ export function DroneDetailPanel({ isOpen, onClose, drone, onFocusMap, onViewHis
               <h3 className="text-label-caps text-outline mb-3">SITE RELATIONSHIPS</h3>
               <div className="space-y-2">
                 {(() => {
-                  // List all configured sites for this drone
-                  const allSites = sites.length > 0 ? sites
-                    : isDemoMode() ? DEMO_SITES
-                    : []
+                  // List all configured sites for this drone. `sites` comes from
+                  // useAllSites() — the shared store + authoritative DB fetch —
+                  // so it reflects the real site list even on pages that never
+                  // mounted the sites data hook, and for ANY viewer role.
+                  const allSites = sites
                   if (allSites.length === 0) {
                     return <p className="text-body-sm text-outline">No sites configured.</p>
                   }

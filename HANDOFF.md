@@ -813,3 +813,78 @@ Viewports: **360×800, 390×844, 412×915, 430×932, 768×1024, 1440×900**
 1. Verify on a physical device (touch behavior for the always-visible location bar + no-popup site tap).
 2. Continue any remaining Priority items from PROJECT_HANDOFF.md.
 3. Re-run `npm run build` before any deploy.
+
+---
+
+## 2026-08-01 — FOUR-TASK IMPLEMENTATION PASS
+
+### TASK 1 — Mobile Footer Copyright
+**Change:** `src/layouts/BottomBar.tsx` — mobile-only copyright font reduced `text-[9px]` → `text-[8px]` (own row, right-aligned, `whitespace-nowrap`).
+**Root cause:** text was too large to fit comfortably on 360px without overflow risk.
+**Verification:** `verify-footer.cjs` → **29/29 PASS** at 360/390/412/430/768/1440px. Copyright fully visible, single line, no horizontal scroll, desktop/tablet unchanged (h-12 row layout, right-section copyright intact, clocks intact).
+
+### TASK 2 — North Arrow / Map Orientation
+**Change:** `src/features/map/MapView.tsx` — north arrow changed from inert `<div>` to a `<button>` that calls `map.current.resetNorthPitch({ duration: 400 })`. Compass already syncs with `mapBearing` via the map's `rotate` event.
+**Why `resetNorthPitch` (not `resetNorth`):** MapLibre's right-button drag rotate introduces pitch (`pitchWithRotate`). `resetNorth()` only resets bearing, leaving a tilt that shifts geo-anchored markers non-uniformly. `resetNorthPitch()` fully re-aligns to north AND levels the view, so all markers return to exact original screen positions — center and zoom are preserved.
+**Verification (Playwright):**
+- Right-drag rotate → compass 0→109°/106°/107° (visual sync confirmed)
+- North Arrow click → compass back to 0
+- ALL site + drone markers return to EXACT original positions (dx=0, dy=0) after rotate+reset → center/zoom preserved
+- Map still interactive (pan works) after reset
+- Mobile: north arrow button visible + tappable at 390×844
+
+### TASK 3 — Master Admin Active Session Management
+**Reviewed end-to-end** (migration, RLS, service, page, sidebar, route). The feature existed but had **critical gaps that made it non-functional**:
+
+1. **`useSession` was NEVER wired into the app** — no `initSession` call existed anywhere, so `active_sessions` rows were never created. Added `src/features/session/SessionLifecycle.tsx` mounted in `src/App.tsx` inside the providers. It drives the session hook; in demo mode it no-ops.
+2. **snake_case→camelCase mismatch** — supabase-js v2 does NOT transform column names, but `SessionInfo`/`DeviceInfo`/`LoginHistoryEntry` used camelCase, so the dashboard read `undefined` for every field. Added `mapSessionRow()` + explicit row mapping in `fetchAllSessions`, `fetchDevices`, `fetchLoginHistory`.
+3. **IP address never populated** — `active_sessions.ip_address` stayed empty. Added Vercel serverless route `api/session/ip.ts` + `fetchPublicIp()` in the service; `initSession` now stores the client IP. Added an "IP Address" column to the Active Sessions table.
+4. **Heartbeat revocation detection broken** — `sendHeartbeat` updated without `.select()`, so a revoked session (0 rows matched) returned `error: null` and never triggered auto-logout. Now `.select('id')` and checks the returned rows; 0 rows → `forceLogout()`.
+5. **Ghost "online" sessions** — because the session token is memory-only, every page reload created a new `online` row while the old one stayed online. `initSession` now marks prior same-device online sessions `offline`/`revoked` before creating the new one.
+6. **`fetchDashboardStats` broken query** — combining `.count('exact')` with a `.gte()` filter produced a PostgREST `PGRST205`. Refactored to plain filtered selects counted in JS.
+7. **Session status notice on login** — `LoginPage` now shows a notice when redirected with `blocked` / `forcedLogout` state (from session revocation/blocking).
+
+**Security / RBAC (unchanged, verified correct):**
+- RLS `active_sessions`: SELECT own-or-master; INSERT own; UPDATE own-or-master; DELETE master-only.
+- RLS `session_devices`: SELECT own-or-master; UPDATE (block/unblock) master-only.
+- RLS `login_history`/`heartbeat_logs`: SELECT own-or-master.
+- Frontend: `ActiveSessionsPage` shows "Access Denied" for non-master; `Sidebar` filters the nav item by `isMasterAdmin`.
+- Non-admin users CANNOT view or manage others' sessions at both the DB and UI layer. No RBAC was weakened.
+
+**Demo-mode note:** In demo mode the placeholder Supabase has no `active_sessions` table, so queries 404 (expected, pre-existing). Production (real Supabase + migration applied) is fully functional. Demo-mode login always resolves to master admin (pre-existing `getSession()` behavior, untouched).
+
+### TASK 4 — Drone Site Relationships Correct for All Users
+**Root cause:** `DroneDetailPanel` read `sites` from `useAuth().sites`, which is only populated when AuthContext's `fetchSites()` resolves. On `DronesPage` (which never mounts `useSitesData`), or before the context fetch resolves / if it fails, the panel's site list was empty → "No sites configured" even though the drone had a real `source_site_id`.
+**Fix:** Added `src/hooks/useAllSites.ts` — resolves sites from (1) shared site store (kept warm by Dashboard/SitesPage), (2) authoritative direct `sites` SELECT from Supabase (RLS allows any authenticated user to read sites), (3) demo sites. `DroneDetailPanel` now uses it for both the "SOURCE SITE" card and the "SITE RELATIONSHIPS" section. RBAC untouched — this only resolves display data for a drone the user is already authorized to view.
+**Verification (Playwright, demo mode):** Opened 5 drones → all show real SOURCE SITE (SITE-01/02/03/04), SITE RELATIONSHIPS section present, correct IN RANGE/OUT OF RANGE + NEAREST SITE, and NEVER "No sites configured."
+
+---
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `src/layouts/BottomBar.tsx` | Mobile copyright 9px→8px |
+| `src/features/map/MapView.tsx` | North arrow div→button, `resetNorthPitch()` |
+| `src/features/session/SessionLifecycle.tsx` | **NEW** — mounts useSession |
+| `src/App.tsx` | Mount `<SessionLifecycle />` |
+| `src/lib/session/sessionService.ts` | mapSessionRow, fetchPublicIp, IP capture, ghost-session cleanup, heartbeat revocation detection, fetchDashboardStats fix |
+| `src/pages/ActiveSessionsPage.tsx` | Added IP Address column |
+| `src/pages/LoginPage.tsx` | Session status notice (blocked/forcedLogout) |
+| `src/hooks/useAllSites.ts` | **NEW** — authoritative site list for drone panels |
+| `src/features/drones/components/DroneDetailPanel.tsx` | Use useAllSites for site + relationships |
+| `api/session/ip.ts` | **NEW** — Vercel route returning caller public IP |
+| `verify-footer.cjs` | Expect 8px mobile copyright |
+
+### Verification Summary
+- `npx tsc -b` → ✅ 0 errors
+- `npm run build` → ✅ succeeds (153 modules)
+- Engine tests → ✅ 17/17 PASS
+- Archive tests → ✅ 6/6 PASS
+- Footer Playwright → ✅ 29/29 PASS
+- Tasks 2/3/4 Playwright → ✅ 10/10 PASS
+- Task 2 center/zoom preservation → ✅ all markers dx=0/dy=0 after north reset
+
+### Known Limitations
+- IP capture requires the Vercel serverless route to be deployed (`/api/session/ip`); local dev without the proxy returns ''.
+- Demo mode uses a placeholder Supabase — session tables 404 (expected). Production requires the `20260801000000_active_session_management.sql` migration applied.
+- Session token is memory-only (pre-existing design): full page navigation re-initiates a session; ghost rows are now marked offline on re-init.

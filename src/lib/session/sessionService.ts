@@ -29,6 +29,28 @@ export interface SessionInfo {
   isRevoked: boolean
 }
 
+/**
+ * Map a raw PostgREST row (snake_case columns) to the camelCase SessionInfo
+ * shape used by the UI. supabase-js v2 does NOT transform column names, so
+ * without this the Active Sessions dashboard would read undefined fields.
+ */
+export function mapSessionRow(row: any): SessionInfo {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    deviceId: row.device_id,
+    sessionToken: row.session_token,
+    ipAddress: row.ip_address ?? undefined,
+    country: row.country ?? undefined,
+    city: row.city ?? undefined,
+    loginTime: row.login_time,
+    lastActivity: row.last_activity,
+    currentPage: row.current_page,
+    status: row.status,
+    isRevoked: row.is_revoked,
+  }
+}
+
 export interface DeviceInfo {
   id: string
   deviceId: string
@@ -69,6 +91,30 @@ export interface DashboardStats {
   blockedDevices: number
   todayLogins: number
   todayFailedLogins: number
+}
+
+// ─── Public IP capture (server-side on Vercel) ───
+
+let _publicIpCache: string | null = null
+
+/**
+ * Resolve the caller's public IP via the serverless route /api/session/ip.
+ * Results are cached in memory for the lifetime of the page so the
+ * heartbeat does not re-fetch on every tick. Falls back to '' silently
+ * when the route is unavailable (local dev without the Vite proxy).
+ */
+export async function fetchPublicIp(): Promise<string> {
+  if (_publicIpCache !== null) return _publicIpCache
+  try {
+    const res = await fetch('/api/session/ip')
+    if (!res.ok) return ''
+    const data = await res.json() as { ip?: unknown }
+    const ip = typeof data.ip === 'string' ? data.ip : ''
+    _publicIpCache = ip
+    return ip
+  } catch {
+    return ''
+  }
 }
 
 // ─── In-memory session token (never persisted to localStorage) ───
@@ -166,8 +212,24 @@ export async function initSession(userId: string): Promise<InitSessionResult> {
 
   const needsDeviceName = !device.device_name || device.device_name === 'Unknown Device'
 
-  // 3. Create active session
+  // 2b. Mark any previously-active sessions for this device as offline BEFORE
+  // creating the new one. Because the session token is held in memory only,
+  // a full page reload loses it and would otherwise leave a ghost "online"
+  // row while the new session is created — inflating the Active Sessions
+  // dashboard. Stale rows are preserved for audit but no longer look live.
+  try {
+    await supabase
+      .from('active_sessions')
+      .update({ status: 'offline', is_revoked: true, revoked_at: new Date().toISOString(), revoked_by: userId })
+      .eq('device_id', fingerprint.deviceId)
+      .eq('user_id', userId)
+      .eq('is_revoked', false)
+      .eq('status', 'online')
+  } catch {}
+
+  // 3. Create active session (ip_address/country/city resolved via Vercel route)
   const sessionToken = crypto.randomUUID()
+  const publicIp = await fetchPublicIp()
   const { data: session, error: sessErr } = await supabase
     .from('active_sessions')
     .insert({
@@ -175,6 +237,7 @@ export async function initSession(userId: string): Promise<InitSessionResult> {
       device_id: fingerprint.deviceId,
       session_token: sessionToken,
       status: 'online',
+      ip_address: publicIp || null,
     })
     .select()
     .single()
@@ -243,18 +306,28 @@ async function sendHeartbeat(): Promise<void> {
   }
   if (currentPage) updates.current_page = currentPage
 
-  const { error } = await supabase
+  // Request the affected rows back so a revoked session (0 rows matched)
+  // is distinguishable from a generic error. Without .select(), a revoked
+  // session's heartbeat succeeds silently and auto-logout never fires.
+  const { error, data } = await supabase
     .from('active_sessions')
     .update(updates)
     .eq('id', _currentSessionId)
     .eq('session_token', _sessionToken)
     .eq('is_revoked', false)
+    .select('id')
 
   if (error) {
     // If session was revoked, log out
     if (error.code === 'PGRST116' || error.message?.includes('row')) {
       await forceLogout('Your session has been revoked by the Master Administrator.')
     }
+    return
+  }
+
+  // Session no longer matches (revoked) — the update returned 0 rows.
+  if (!data || data.length === 0) {
+    await forceLogout('Your session has been revoked by the Master Administrator.')
     return
   }
 
@@ -343,7 +416,11 @@ export async function fetchAllSessions(): Promise<SessionInfo[]> {
     .order('login_time', { ascending: false })
 
   if (error) throw error
-  return data as any
+  // Preserve the joined profile object alongside the mapped session fields.
+  return (data || []).map((row: any) => ({
+    ...mapSessionRow(row),
+    profiles: row.profiles,
+  })) as any
 }
 
 export async function fetchDevices(): Promise<DeviceInfo[]> {
@@ -353,7 +430,21 @@ export async function fetchDevices(): Promise<DeviceInfo[]> {
     .order('last_seen', { ascending: false })
 
   if (error) throw error
-  return data as any
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    deviceId: row.device_id,
+    deviceName: row.device_name,
+    browser: row.browser ?? undefined,
+    browserVersion: row.browser_version ?? undefined,
+    os: row.os ?? undefined,
+    platform: row.platform ?? undefined,
+    language: row.language ?? undefined,
+    timezone: row.timezone ?? undefined,
+    screenResolution: row.screen_resolution ?? undefined,
+    firstSeen: row.first_seen,
+    lastSeen: row.last_seen,
+    isBlocked: row.is_blocked,
+  })) as DeviceInfo[]
 }
 
 export async function revokeSession(sessionId: string, revokedBy: string): Promise<void> {
@@ -407,41 +498,50 @@ export async function fetchLoginHistory(options?: {
 
   const { data, error } = await query
   if (error) throw error
-  return data as any
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    userId: row.user_id ?? undefined,
+    username: row.username ?? undefined,
+    eventType: row.event_type,
+    deviceId: row.device_id ?? undefined,
+    deviceName: row.device_name ?? undefined,
+    ipAddress: row.ip_address ?? undefined,
+    browser: row.browser ?? undefined,
+    country: row.country ?? undefined,
+    city: row.city ?? undefined,
+    failureReason: row.failure_reason ?? undefined,
+    createdAt: row.created_at,
+    profiles: row.profiles,
+  })) as any
 }
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
-  const now = new Date().toISOString()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const [sessions, devices, history] = await Promise.all([
-    supabase.from('active_sessions').select('id, status, is_revoked', { count: 'exact' }).eq('is_revoked', false),
-    supabase.from('session_devices').select('id, is_blocked', { count: 'exact' }),
-    supabase.from('login_history').select('event_type', { count: 'exact' }).gte('created_at', today.toISOString()),
+  // Note: counts are computed in JS from filtered selects. Combining
+  // `.count('exact')` with a `.gte()` filter in one request produced a broken
+  // PostgREST query (PGRST205) — splitting into simple filtered selects and
+  // counting locally is reliable and identical in result.
+  const [sessionsRes, devicesRes, userSessionsRes, todayLoginsRes] = await Promise.all([
+    supabase.from('active_sessions').select('id, status, is_revoked').eq('is_revoked', false),
+    supabase.from('session_devices').select('id, is_blocked'),
+    supabase.from('active_sessions').select('user_id').eq('is_revoked', false),
+    supabase.from('login_history').select('event_type').gte('created_at', today.toISOString()),
   ])
 
-  const activeSessions = sessions.data || []
+  const activeSessions = sessionsRes.data || []
   const onlineDevices = activeSessions.filter(s => s.status === 'online').length
   const idleDevices = activeSessions.filter(s => s.status === 'idle').length
 
   // Count unique users with active sessions
-  const { data: userSessions } = await supabase
-    .from('active_sessions')
-    .select('user_id')
-    .eq('is_revoked', false)
-
-  const uniqueUsers = new Set((userSessions || []).map(s => s.user_id))
+  const uniqueUsers = new Set((userSessionsRes.data || []).map(s => s.user_id))
 
   // Today's logins
-  const { data: todayLogins } = await supabase
-    .from('login_history')
-    .select('event_type')
-    .gte('created_at', today.toISOString())
-
-  const loginCount = (todayLogins || []).filter(e => e.event_type === 'login').length
-  const failedCount = (todayLogins || []).filter(e => e.event_type === 'failed_login').length
-  const blockedCount = (devices.data || []).filter(d => d.is_blocked).length
+  const todayLogins = todayLoginsRes.data || []
+  const loginCount = todayLogins.filter(e => e.event_type === 'login').length
+  const failedCount = todayLogins.filter(e => e.event_type === 'failed_login').length
+  const blockedCount = (devicesRes.data || []).filter(d => d.is_blocked).length
 
   return {
     activeAccounts: uniqueUsers.size,

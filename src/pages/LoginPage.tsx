@@ -25,6 +25,15 @@ export function LoginPage() {
   const from = (location.state as any)?.from?.pathname || '/dashboard'
   const isDemo = isDemoMode()
 
+  // Optional session-status notice shown when the user was forced out
+  // (session revoked by Master Admin) or their device was blocked.
+  const sessionNotice = (() => {
+    const st = location.state as any
+    if (st?.blocked) return { kind: 'error' as const, text: 'This device has been blocked by the Master Administrator.' }
+    if (st?.forcedLogout) return { kind: 'error' as const, text: String(st.forcedLogout) }
+    return null
+  })()
+
   useEffect(() => {
     if (user && !loading) {
       navigate(from, { replace: true })
@@ -154,6 +163,14 @@ export function LoginPage() {
               />
             </div>
           </div>
+
+          {/* Session status notice (forced logout / blocked device) */}
+          {sessionNotice && (
+            <div className="bg-error-container/20 border border-error p-3 flex items-start gap-2">
+              <span className="material-symbols-outlined text-error text-sm mt-0.5">gpp_bad</span>
+              <p className="text-body-sm text-on-error-container">{sessionNotice.text}</p>
+            </div>
+          )}
 
           {/* Error */}
           {(localError || error) && (

@@ -65,7 +65,7 @@ for (const [w, h] of MOBILE) {
   log(`${w}x${h}`, 'Footer: no horizontal scrolling', f.found && f.noHScroll, `sw=${f.footerScrollW} cw=${f.footerClientW} vw=${f.vw}`)
   log(`${w}x${h}`, 'Footer: copyright visible', f.copyrightVisible)
   log(`${w}x${h}`, 'Footer: copyright text correct', f.copyrightText === '© First Lieutenant / Belal Essam', `"${f.copyrightText}"`)
-  log(`${w}x${h}`, 'Footer: copyright small font + single line', f.copyrightFont === '9px' && f.copyrightSingleLine, `fs=${f.copyrightFont} oneLine=${f.copyrightSingleLine}`)
+  log(`${w}x${h}`, 'Footer: copyright small font + single line', f.copyrightFont === '8px' && f.copyrightSingleLine, `fs=${f.copyrightFont} oneLine=${f.copyrightSingleLine}`)
   log(`${w}x${h}`, 'Footer: copyright within viewport (no overflow)', f.copyrightWithinViewport)
   // Ensure clocks still present
   const clocks = await page.evaluate(() => {

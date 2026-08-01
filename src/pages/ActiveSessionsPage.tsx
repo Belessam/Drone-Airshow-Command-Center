@@ -245,6 +245,7 @@ export function ActiveSessionsPage() {
                       <thead>
                         <tr className="border-b border-outline-variant/40 text-outline text-label-caps text-[9px]">
                           <th className="py-2 px-4">Device</th>
+                          <th className="py-2 px-4">IP Address</th>
                           <th className="py-2 px-4">Browser</th>
                           <th className="py-2 px-4">OS</th>
                           <th className="py-2 px-4">Login Time</th>
@@ -269,6 +270,9 @@ export function ActiveSessionsPage() {
                                   <p className="text-on-surface text-[11px] font-medium">{device?.deviceName || 'Unknown Device'}</p>
                                   <p className="text-outline text-[9px] mt-0.5">{session.deviceId.slice(0, 12)}...</p>
                                 </div>
+                              </td>
+                              <td className="py-2.5 px-4 text-on-surface-variant font-data-mono">
+                                {session.ipAddress || '-'}
                               </td>
                               <td className="py-2.5 px-4 text-on-surface-variant">
                                 {device?.browser || '-'} {device?.browserVersion || ''}

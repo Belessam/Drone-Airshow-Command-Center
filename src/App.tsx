@@ -12,11 +12,13 @@ import { HistoryPage } from '@/pages/HistoryPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { ActiveSessionsPage } from '@/pages/ActiveSessionsPage'
+import { SessionLifecycle } from '@/features/session/SessionLifecycle'
 
 export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
+        <SessionLifecycle />
         <Routes>
         {/* Public route — login */}
         <Route path="/login" element={<AuthLayout />}>

@@ -1630,3 +1630,42 @@ Surgical mobile-only adjustments. **Full change log + reasons + verification in 
 8. Check console for `[HAB TRACE]`, `[HAB TRACE HOOK]`, `[HAB TRACE MAPVIEW]` logs
 9. If aircraft near Sites (especially Dubai/Abu Dhabi) are visible, the pipeline is working
 10. HAB will show aircraft when the area has traffic — the code is prepared for it
+
+---
+
+## 33. FOUR-TASK IMPLEMENTATION PASS (2026-08-01)
+
+### What changed
+Four targeted fixes, no regression to existing functionality. See `HANDOFF.md` for full detail.
+
+1. **Mobile footer copyright** (`BottomBar.tsx`) — `text-[9px]` → `text-[8px]` (mobile-only). Verified 29/29 footer checks at 360/390/412/430/768/1440px.
+2. **North Arrow** (`MapView.tsx`) — now a button calling `map.resetNorthPitch()`. Resets bearing to 0 AND levels pitch (MapLibre right-drag rotate introduces pitch). All geo-anchored markers return to exact original positions (center/zoom preserved). Compass stays synced via the `rotate` event.
+3. **Active Sessions made functional** (`SessionLifecycle.tsx`, `sessionService.ts`, `api/session/ip.ts`, `ActiveSessionsPage.tsx`, `LoginPage.tsx`, `App.tsx`) — wired the previously-unmounted `useSession` hook; fixed snake_case→camelCase mapping; added real IP capture via a new Vercel route; fixed heartbeat revocation detection; cleaned up ghost sessions on reload; fixed `fetchDashboardStats` broken count+filter query; added forced-logout/blocked notice on login. RBAC + RLS unchanged and verified correct (master-only session management at both layers).
+4. **Drone Site Relationships** (`useAllSites.ts`, `DroneDetailPanel.tsx`) — root cause was the panel reading `useAuth().sites` which can be empty on pages that never mount `useSitesData` (e.g. DronesPage) or before the context fetch resolves. `useAllSites` resolves sites from the shared store + authoritative DB fetch, so relationships render correctly for ANY viewer role. Verified 5 drones show real source sites + relationships, never "No sites configured."
+
+### Files
+- NEW: `src/features/session/SessionLifecycle.tsx`, `src/hooks/useAllSites.ts`, `api/session/ip.ts`
+- MODIFIED: `src/App.tsx`, `src/layouts/BottomBar.tsx`, `src/features/map/MapView.tsx`, `src/lib/session/sessionService.ts`, `src/pages/ActiveSessionsPage.tsx`, `src/pages/LoginPage.tsx`, `src/features/drones/components/DroneDetailPanel.tsx`, `verify-footer.cjs`
+
+### Verification
+- ✅ `npx tsc -b` — 0 errors
+- ✅ `npm run build` — succeeds (153 modules)
+- ✅ Engine tests 17/17, Archive tests 6/6
+- ✅ Footer Playwright 29/29
+- ✅ Tasks 2/3/4 Playwright 10/10 (north arrow rotate→reset→interactive; master-admin sessions access; drone relationships correct)
+- ✅ North reset preserves center/zoom (markers dx=0/dy=0)
+
+### Security/RBAC notes
+- No RBAC weakened. `ActiveSessionsPage` shows "Access Denied" to non-master; sidebar filters the item; RLS enforces master-only session management (UPDATE own-or-master, DELETE master-only, session_devices UPDATE master-only).
+- Task 4 only resolves *display* data (site list) for an already-authorized drone. Drone manage/edit/delete permissions unchanged.
+
+### Known limitations
+- IP capture needs the Vercel route deployed; local dev falls back to ''.
+- Demo mode uses placeholder Supabase → session tables 404 (expected). Production requires the active-session migration.
+- Session token memory-only (pre-existing) — reloads re-init; ghost rows now marked offline.
+
+## NEXT SESSION START HERE
+1. Read sections 31–33 of this file.
+2. Run `npx tsc -b` and `npm run build`.
+3. Check `.env` (`VITE_DEMO_MODE=false` in production).
+4. If testing sessions locally, run with `VITE_DEMO_MODE=true` for demo data, or connect real Supabase for the session tables.

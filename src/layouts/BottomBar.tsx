@@ -45,9 +45,10 @@ export function BottomBar({ activeDrones = 0 }: { activeDrones?: number }) {
         </div>
       </div>
 
-      {/* Mobile-only copyright — very small, own row, never overflows */}
+      {/* Mobile-only copyright — very small, own row, never overflows.
+          Sized to fit the full text within 360px without horizontal scrolling. */}
       <div className="lg:hidden sm:hidden w-full text-right">
-        <span className="text-[9px] font-data-mono text-outline/60 tracking-wider select-none whitespace-nowrap">
+        <span className="text-[8px] font-data-mono text-outline/60 tracking-wider select-none whitespace-nowrap">
           © First Lieutenant / Belal Essam
         </span>
       </div>

@@ -569,14 +569,18 @@ export function MapView({ drones, sites, aircraft, showAircraft = true, onDroneC
       {/* Top-right cluster — north arrow (rotates with map bearing) + fullscreen toggle */}
       <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2 pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
-          <div
-            className="w-8 h-8 rounded border border-outline-variant bg-surface-container/80 flex items-center justify-center transition-transform duration-150"
+          <button
+            type="button"
+            onClick={() => { if (map.current) map.current.resetNorthPitch({ duration: 400 }) }}
+            className="w-8 h-8 rounded border border-outline-variant bg-surface-container/80 flex items-center justify-center transition-transform duration-150 hover:bg-surface-container-high cursor-pointer"
             style={{ transform: `rotate(${-mapBearing}deg)` }}
+            title="Reset map north"
+            aria-label="Reset map north"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polygon points="8,2 4,14 8,11 12,14" fill="#EF4444" stroke="#EF4444" strokeWidth="0.5"/>
             </svg>
-          </div>
+          </button>
           <span className="text-label-caps text-on-surface-variant text-[11px] font-bold">N</span>
         </div>
         {onToggleFullscreen && (
