@@ -40,28 +40,40 @@ async function resolveUsername(username: string): Promise<string | null> {
     return DEMO_USERNAME_MAP[username] || username + '@demo.mil'
   }
 
+  const normalized = username.trim()
+
   try {
     // First try matching by username
     const { data, error } = await supabase
       .from('profiles')
       .select('email')
-      .eq('username', username)
+      .eq('username', normalized)
       .eq('is_active', true)
       .maybeSingle()
 
     if (!error && data) return data.email
 
     // If not found by username, check if input looks like an email and try matching by email
-    if (username.includes('@')) {
+    if (normalized.includes('@')) {
       const { data: emailData, error: emailError } = await supabase
         .from('profiles')
         .select('email')
-        .eq('email', username.toLowerCase().trim())
+        .eq('email', normalized.toLowerCase().trim())
         .eq('is_active', true)
         .maybeSingle()
 
       if (!emailError && emailData) return emailData.email
     }
+
+    // Fallback: the profiles SELECT policies only allow authenticated users, so
+    // this pre-auth lookup returns nothing when RLS blocks the anon key. Resolve
+    // the known production accounts via DEMO_USERNAME_MAP so Supabase Auth can
+    // still verify the access key. Unknown usernames are NOT mapped — rejected.
+    const normalizedLower = normalized.toLowerCase()
+    const fallbackEntry = Object.entries(DEMO_USERNAME_MAP).find(
+      ([key]) => key.toLowerCase() === normalizedLower,
+    )
+    if (fallbackEntry) return fallbackEntry[1]
 
     return null
   } catch {
